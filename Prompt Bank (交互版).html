@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROMPT BANK — Interactive Edition</title>
+<style>
+:root{
+  --paper:#f2f2ec; --paper2:#fafaf5; --white:#fff;
+  --ink:#111110; --muted:#6c6c62; --faint:#9a9a90;
+  --line:#d4d4c9; --line2:#b6b6aa; --yellow:#f2e53b; --yellow-dk:#ddd01f;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6;
+  font-family:"Helvetica Neue",Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased}
+button,input,textarea,select{font-family:inherit}
+button{cursor:pointer;border-radius:0}
+a{color:inherit}
+::selection{background:var(--yellow);color:var(--ink)}
+.pad{padding:0 3.2vw}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.caps{font-size:10px;letter-spacing:.17em;text-transform:uppercase;font-weight:700}
+.hl{background:var(--yellow);color:var(--ink);padding:4px 9px;font-weight:800;letter-spacing:.02em}
+
+/* ---------- masthead ---------- */
+.mast-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  border-bottom:1px solid var(--ink);padding:13px 0;color:var(--muted)}
+.mast-main{display:grid;grid-template-columns:1.12fr .88fr;gap:4vw;padding:3.2vw 0 2.6vw;align-items:start}
+.big-title{font-size:clamp(62px,11.5vw,180px);line-height:.80;font-weight:900;letter-spacing:-.068em;margin:0}
+.big-title span{display:block}
+.mast-right{padding-top:6px}
+.mast-right .kicker{color:var(--muted);margin-bottom:22px;display:block}
+.mast-right .desc{font-size:15px;line-height:1.52;max-width:40ch;margin:0 0 22px}
+.mast-right .proj{font-size:clamp(19px,1.9vw,27px);font-weight:900;line-height:1.05;letter-spacing:-.035em;margin:18px 0 3px}
+.mast-right .proj-sub{color:var(--muted);margin-bottom:20px}
+.stat-row{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);margin-top:22px}
+.stat-cell{flex:1;min-width:78px;padding:10px 8px 9px 0;border-right:1px solid var(--line)}
+.stat-cell:last-child{border-right:0}
+.stat-cell b{display:block;font-size:24px;font-weight:900;line-height:1;letter-spacing:-.04em}
+.stat-cell span{font-size:9px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase}
+.mast-photo{height:34px;background:
+  repeating-linear-gradient(135deg,#3a3a37 0 2px,#4a4a46 2px 4px,#2e2e2b 4px 7px);
+  border:1px solid var(--ink);margin-bottom:20px;max-width:210px}
+
+/* ---------- section heads ---------- */
+section{scroll-margin-top:20px}
+.block-head{display:flex;align-items:baseline;gap:16px;border-top:1px solid var(--ink);padding-top:11px;margin:0 0 18px;flex-wrap:wrap}
+.block-head .idx{color:var(--muted);min-width:26px}
+.block-head h2{font-size:clamp(25px,3.1vw,44px);font-weight:900;letter-spacing:-.045em;margin:0;line-height:1}
+.block-head .side{margin-left:auto;color:var(--muted)}
+.block{margin-bottom:40px}
+
+/* ---------- workbench ---------- */
+.wb-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--ink)}
+.wb-cell{padding:16px 18px;border-right:1px solid var(--ink)}
+.wb-cell:last-child{border-right:0}
+.wb-cell label{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;margin-bottom:9px}
+.wb-cell label em{font-style:normal;color:var(--faint);font-weight:500;letter-spacing:.02em;text-transform:none;margin-left:6px;font-size:11px}
+textarea,input[type=text],input[type=password],input[type=number]{
+  width:100%;border:1px solid var(--line2);background:var(--paper2);color:var(--ink);
+  padding:10px 12px;font-size:13px;outline:0;resize:vertical;line-height:1.62}
+textarea:focus,input:focus{border-color:var(--ink);background:#fff;box-shadow:inset 3px 0 0 var(--yellow)}
+textarea{min-height:104px}
+textarea.big{min-height:132px}
+.field-note{font-size:11px;color:var(--faint);margin-top:7px}
+.wb-sub{border:1px solid var(--ink);border-top:0;padding:13px 18px;display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.linkish{background:none;border:0;text-decoration:underline;text-underline-offset:4px;font-size:12px;font-weight:700;color:var(--ink);padding:3px 0}
+.linkish:hover{background:var(--yellow);text-decoration:none}
+.wb-sub .spacer{flex:1}
+
+/* buttons */
+.btn{border:1px solid var(--ink);background:transparent;color:var(--ink);padding:9px 15px;
+  font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;transition:.12s;white-space:nowrap}
+.btn:hover{background:var(--ink);color:#fff}
+.btn-y{background:var(--yellow);border:1px solid var(--ink);color:var(--ink);font-weight:900}
+.btn-y:hover{background:var(--ink);color:var(--yellow)}
+.btn-k{background:var(--ink);color:#fff}
+.btn-k:hover{background:var(--yellow);color:var(--ink)}
+.btn-lg{padding:14px 24px;font-size:12px;letter-spacing:.14em}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:6px 11px;font-size:10px}
+
+.runbar{display:flex;gap:0;flex-wrap:wrap;border:1px solid var(--ink);border-top:0}
+.runbar .btn{border:0;border-right:1px solid var(--ink);flex:1;min-width:150px;text-align:center}
+.runbar .btn:last-child{border-right:0}
+.runbar .btn-y{flex:2.2}
+
+.collapsible{display:none;border:1px solid var(--ink);border-top:0;padding:18px;margin-top:0}
+.collapsible.open{display:block}
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 22px}
+.cfg-grid .full{grid-column:1/-1}
+.cfg-title{font-size:10px;letter-spacing:.17em;text-transform:uppercase;font-weight:800;
+  border-bottom:1px solid var(--ink);padding-bottom:6px;margin:20px 0 12px}
+.cfg-title:first-child{margin-top:0}
+.map-table{width:100%;border-collapse:collapse;font-size:12px}
+.map-table th{text-align:left;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  border-bottom:1px solid var(--ink);padding:6px 8px;color:var(--muted);font-weight:800}
+.map-table td{border-bottom:1px solid var(--line);padding:4px 8px}
+.map-table td:first-child{width:120px;font-weight:700;letter-spacing:.06em}
+.map-table input{border:1px solid transparent;background:transparent;padding:5px 7px;font-size:11.5px}
+.map-table input:focus{border-color:var(--ink);background:#fff}
+.note-box{border-left:3px solid var(--yellow);background:var(--paper2);padding:11px 14px;
+  font-size:11.5px;color:#4a4a42;line-height:1.65;margin-top:14px}
+.chk{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer}
+
+/* ---------- toolbar ---------- */
+.toolbar{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:10px 0;
+  display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:0;background:var(--paper)}
+.tabs{display:flex;border:1px solid var(--ink)}
+.tabs button{border:0;border-right:1px solid var(--ink);background:transparent;padding:7px 13px;
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--ink)}
+.tabs button:last-child{border-right:0}
+.tabs button:hover{background:var(--paper2)}
+.tabs button.on{background:var(--ink);color:#fff}
+.search{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;border:1px solid var(--ink);background:var(--paper2);padding:0 11px}
+.search input{border:0;background:transparent;padding:8px 0;font-size:12.5px;box-shadow:none}
+.search input:focus{box-shadow:none;background:transparent;border:0}
+.hit-count{font-size:10px;letter-spacing:.1em;color:var(--muted);white-space:nowrap}
+
+/* ---------- cards ---------- */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:0;
+  border-left:1px solid var(--line);border-top:1px solid var(--line)}
+.pcard{background:var(--paper2);border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  display:flex;flex-direction:column;transition:.12s}
+.pcard:hover{background:#fff;box-shadow:inset 0 0 0 1px var(--ink)}
+.pc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:11px 14px 9px}
+.pc-left{display:flex;align-items:baseline;gap:9px;min-width:0}
+.pno{font-size:25px;font-weight:900;letter-spacing:-.05em;line-height:1}
+.lang-tag{font-size:9px;letter-spacing:.13em;font-weight:900;border:1px solid var(--ink);padding:2px 6px}
+.lang-tag.en{background:var(--ink);color:#fff}
+.lang-tag.cn{background:var(--yellow)}
+.pc-family{font-size:9px;letter-spacing:.11em;color:var(--faint);text-transform:uppercase;white-space:nowrap}
+.model-chip{border:0;background:transparent;padding:0;text-align:right;max-width:54%}
+.model-chip b{display:block;font-size:11.5px;font-weight:900;letter-spacing:-.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.model-chip .ver{display:inline-block;background:var(--ink);color:#fff;font-size:9px;
+  font-weight:800;padding:1px 6px;letter-spacing:.06em;margin-top:3px}
+.model-chip .api-to{display:block;font-size:9px;color:var(--muted);letter-spacing:.02em;margin-top:3px}
+.model-chip:hover b{text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:3px}
+.pc-body{padding:0 14px 12px;flex:1}
+.pc-scene{font-size:13.5px;font-weight:800;line-height:1.4;margin:0 0 9px;letter-spacing:-.01em}
+.pc-tpl{font-size:12.3px;line-height:1.6;color:#33332e;border-left:2px solid var(--yellow);
+  padding:2px 0 2px 10px;max-height:150px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.ph{background:var(--yellow);color:var(--ink);padding:0 3px;font-size:11px;font-weight:800;white-space:nowrap}
+.pc-format{font-size:11.3px;line-height:1.5;margin-top:10px;padding:7px 9px;background:#ececdf}
+.pc-format b{font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-right:6px}
+.pc-slots{font-size:10.5px;color:var(--muted);margin-top:8px}
+.pc-note{font-size:10px;color:var(--faint);line-height:1.5;margin:7px 0 0;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+.pc-note.open{display:block;-webkit-line-clamp:unset}
+.pc-acts{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--line)}
+.pc-acts button{border:0;border-right:1px solid var(--line);background:transparent;padding:10px 4px;
+  font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:var(--ink)}
+.pc-acts button:last-child{border-right:0}
+.pc-acts button:hover{background:var(--yellow)}
+.pc-acts button.primary{background:var(--ink);color:#fff}
+.pc-acts button.primary:hover{background:var(--yellow);color:var(--ink)}
+.compare-wrap{border-top:1px solid var(--line)}
+.compare-tag{font-size:9.5px;letter-spacing:.16em;font-weight:800;color:var(--muted);
+  border-bottom:1px solid var(--line);padding:8px 0;text-transform:uppercase}
+.compare-row{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid var(--line)}
+.compare-row .pcard{border-top:0}
+
+/* ---------- batch ---------- */
+.batch{border:1px solid var(--ink);margin:18px 0 30px;display:none}
+.batch.open{display:block}
+.batch-head{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:13px 16px;border-bottom:1px solid var(--ink);background:var(--ink);color:#fff;flex-wrap:wrap}
+.batch-head h3{margin:0;font-size:14px;letter-spacing:.1em;text-transform:uppercase;font-weight:900}
+.batch-head .bstat{font-size:11px;letter-spacing:.1em}
+.progress{height:8px;background:var(--line);border-bottom:1px solid var(--ink)}
+.progress i{display:block;height:100%;background:var(--yellow);width:0;transition:width .2s}
+.batch-list{max-height:560px;overflow:auto}
+.brow{border-bottom:1px solid var(--line);display:grid;grid-template-columns:74px 1fr 132px;gap:0}
+.brow:hover{background:#fff}
+.brow-id{padding:11px 12px;border-right:1px solid var(--line);font-size:17px;font-weight:900;letter-spacing:-.04em}
+.brow-id small{display:block;font-size:9px;letter-spacing:.1em;font-weight:700;color:var(--muted)}
+.brow-main{padding:11px 14px;min-width:0}
+.brow-main .bt{font-size:11px;font-weight:800;margin-bottom:5px}
+.brow-main .bmodel{font-size:9.5px;color:var(--muted);letter-spacing:.06em;margin-bottom:6px}
+.brow-out{font-size:11.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;
+  max-height:96px;overflow:auto;color:#33332e;border-left:2px solid var(--line2);padding-left:9px}
+.brow-out.err{color:#9b2c20;border-left-color:#9b2c20}
+.brow-side{padding:11px 12px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.status{font-size:9px;letter-spacing:.13em;font-weight:900;text-transform:uppercase;
+  border:1px solid var(--ink);padding:2px 6px}
+.status.done,.status.generated{background:var(--yellow);border-color:var(--yellow)}
+.status.running{background:var(--ink);color:#fff}
+.status.error{background:#9b2c20;color:#fff;border-color:#9b2c20}
+.brow-side .btn{padding:4px 8px;font-size:9px}
+.batch-foot{padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--ink)}
+
+/* ---------- meta + requirements ---------- */
+.req{border:1px solid var(--ink);padding:14px 18px;font-size:12.5px;color:#3c3c36;margin-bottom:34px}
+.req h3{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 8px}
+.req ul{margin:0;padding-left:19px}.req li{margin:3px 0}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--ink)}
+.meta-card{padding:18px 20px;border-right:1px solid var(--ink)}
+.meta-card:last-child{border-right:0}
+.meta-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.meta-role{font-size:17px;font-weight:900;letter-spacing:-.03em}
+.meta-intro{font-size:12.5px;color:#3c3c36;margin:0 0 10px}
+.meta-list{margin:0 0 14px;padding-left:19px;font-size:12px;color:#4a4a42}
+.meta-list li{margin:3px 0}
+.meta-card textarea{min-height:84px}
+.meta-card .wb-sub{border:0;padding:12px 0 0;gap:7px}
+
+/* ---------- footer + floating menu ---------- */
+footer{border-top:1px solid var(--ink);padding:16px 0 26px;display:flex;justify-content:space-between;
+  gap:14px;flex-wrap:wrap;color:var(--muted)}
+footer .flinks{display:flex;gap:14px;flex-wrap:wrap}
+footer a{text-decoration:none}
+footer a:hover{background:var(--yellow);color:var(--ink)}
+.fab{position:fixed;right:3.2vw;bottom:3.2vw;z-index:50;width:54px;height:48px;background:var(--ink);
+  border:1px solid var(--ink);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px}
+.fab i{display:block;width:22px;height:2px;background:var(--yellow)}
+.fab:hover{background:var(--yellow)}
+.fab:hover i{background:var(--ink)}
+.fab-menu{position:fixed;right:3.2vw;bottom:calc(3.2vw + 60px);z-index:50;background:var(--ink);
+  color:#fff;display:none;flex-direction:column;min-width:196px;border:1px solid var(--ink)}
+.fab-menu.open{display:flex}
+.fab-menu button{background:transparent;border:0;border-bottom:1px solid #3a3a37;color:#fff;
+  text-align:left;padding:11px 14px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:800}
+.fab-menu button:last-child{border-bottom:0}
+.fab-menu button:hover{background:var(--yellow);color:var(--ink)}
+
+/* ---------- drawer ---------- */
+.mask{position:fixed;inset:0;background:rgba(17,17,16,.42);z-index:70;opacity:0;pointer-events:none;transition:.2s}
+.mask.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:min(580px,100%);background:var(--paper2);z-index:71;
+  border-left:1px solid var(--ink);transform:translateX(102%);transition:.24s ease;display:flex;flex-direction:column}
+.drawer.on{transform:translateX(0)}
+.dw-head{background:var(--ink);color:#fff;padding:17px 20px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.dw-head h3{margin:0 0 5px;font-size:17px;font-weight:900;letter-spacing:-.02em}
+.dw-head p{margin:0;font-size:10px;letter-spacing:.1em;color:#c9c9bf}
+.dw-x{background:transparent;border:1px solid #6a6a60;color:#fff;width:29px;height:29px;font-size:18px;line-height:1;flex:none}
+.dw-x:hover{background:var(--yellow);color:var(--ink);border-color:var(--yellow)}
+.dw-body{padding:18px 20px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:14px}
+.dw-model{display:grid;grid-template-columns:1fr 96px;gap:0;border:1px solid var(--ink)}
+.dw-model>div{padding:10px 12px;border-right:1px solid var(--ink)}
+.dw-model>div:last-child{border-right:0}
+.dw-model label{display:block;font-size:9px;letter-spacing:.13em;text-transform:uppercase;font-weight:800;color:var(--muted);margin-bottom:5px}
+.dw-model input{border:1px solid var(--line2);background:#fff;padding:7px 9px;font-size:12px}
+.dw-api-model{font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-top:0;padding:8px 12px;background:var(--paper)}
+.dw-api-model b{color:var(--ink);font-family:ui-monospace,Menlo,monospace}
+.dw-label{font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;font-weight:800;color:var(--muted)}
+.dw-prompt{min-height:270px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.3px;line-height:1.65;border:1px solid var(--ink)}
+.dw-warn{border-left:3px solid #9b2c20;background:#fff4f1;padding:10px 12px;font-size:11.5px;color:#7f2b20;line-height:1.6}
+.dw-result{background:var(--paper);border:1px solid var(--ink);padding:13px;font-size:12.3px;line-height:1.65;
+  white-space:pre-wrap;word-break:break-word;max-height:340px;overflow:auto}
+.dw-links{display:flex;gap:0;border:1px solid var(--ink);flex-wrap:wrap}
+.dw-links button{flex:1;min-width:110px;border:0;border-right:1px solid var(--ink);background:transparent;
+  padding:9px 6px;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:800}
+.dw-links button:hover{background:var(--yellow)}
+.dw-foot{padding:13px 20px;border-top:1px solid var(--ink);display:flex;gap:0;background:var(--paper)}
+.dw-foot .btn{flex:1;border-right:0;border-left:1px solid var(--ink);text-align:center}
+.dw-foot .btn:first-child{border-left:0}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,18px);background:var(--ink);color:#fff;
+  padding:11px 20px;font-size:12px;font-weight:700;z-index:95;opacity:0;pointer-events:none;transition:.2s;
+  border:1px solid var(--yellow)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:900px){
+  .mast-main{grid-template-columns:1fr;gap:22px}
+  .big-title{font-size:clamp(62px,18vw,130px)}
+  .wb-grid,.cfg-grid,.meta-grid,.compare-row{grid-template-columns:1fr}
+  .wb-cell{border-right:0;border-bottom:1px solid var(--ink)}
+  .meta-card{border-right:0;border-bottom:1px solid var(--ink)}
+  .cards-grid{grid-template-columns:1fr}
+  .brow{grid-template-columns:62px 1fr}
+  .brow-side{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);flex-direction:row;flex-wrap:wrap}
+  .block-head .side{display:none}
+}
+@media print{
+  body{background:#fff;font-size:10px}
+  .toolbar,.fab,.fab-menu,.drawer,.mask,.toast,.pc-acts,.runbar,.collapsible,.wb-sub,.batch{display:none !important}
+  .pad{padding:0}
+  .mast-main{padding:10px 0}
+  .big-title{font-size:60px}
+  .pcard,.meta-card,.req{break-inside:avoid}
+  .cards-grid{display:block}
+  .pcard{border:1px solid #999;margin-bottom:6px}
+  .pc-tpl{max-height:none;overflow:visible}
+}
+
+/* ===== EMBEDDED ENGINE v3 ===== */
+.engine-strip{display:flex;align-items:center;gap:12px;border:1px solid var(--ink);border-top:0;padding:11px 16px;background:#fff;flex-wrap:wrap}
+.eng-dot{width:10px;height:10px;background:var(--faint);flex:none;display:inline-block}
+.eng-dot.on{background:#1a9b4b}
+.eng-dot.warn{background:#e8a000}
+.eng-dot.err{background:#c02c2c}
+.eng-name{font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.eng-msg{font-size:12px;color:var(--muted);flex:1;min-width:190px}
+.eng-msg b{color:var(--ink)}
+.engine-strip .btn{padding:5px 11px;font-size:10px}
+.eng-modes{display:flex;gap:0;border:1px solid var(--ink);margin-bottom:16px;flex-wrap:wrap}
+.eng-modes button{border:0;border-right:1px solid var(--ink);background:transparent;color:var(--ink);padding:9px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;cursor:pointer}
+.eng-modes button:last-child{border-right:0}
+.eng-modes button.on{background:var(--yellow)}
+.eng-preset{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.eng-preset select{width:100%;border:1px solid var(--line2);background:var(--paper2);color:var(--ink);padding:9px;font-size:13px;font-family:inherit}
+.eng-test{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
+.eng-log{font-size:11.5px;border:1px solid var(--line2);background:var(--paper2);padding:10px 12px;min-height:34px;white-space:pre-wrap;word-break:break-word;color:var(--muted);line-height:1.7}
+.eng-log.ok{background:#eef8f0;color:#175c30;border-color:#1a9b4b}
+.eng-log.bad{background:#fdf0ef;color:#8c2020;border-color:#c02c2c}
+.eng-steps{counter-reset:s;list-style:none;padding:0;margin:10px 0 0}
+.eng-steps li{counter-increment:s;padding:7px 0 7px 30px;position:relative;font-size:12.5px;border-bottom:1px solid var(--line)}
+.eng-steps li:before{content:counter(s);position:absolute;left:0;top:7px;width:19px;height:19px;background:var(--ink);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+code.k{background:#fff;border:1px solid var(--line2);padding:1px 5px;font-size:11.5px;font-family:ui-monospace,Menlo,monospace}
+.pc-acts button.embed-run{background:var(--ink);color:#fff;font-weight:800}
+.pc-acts button.embed-run:hover{background:var(--yellow);color:var(--ink)}
+.pc-engine{font-size:9px;font-weight:900;letter-spacing:.09em;color:#175c30;border:1px solid #1a9b4b;padding:1px 5px}
+.dw-meta{font-size:10.5px;color:var(--muted);letter-spacing:.05em;margin-top:6px}
+.dw-result-acts{display:flex;gap:8px;margin-top:8px}
+@media(max-width:720px){.eng-preset{grid-template-columns:1fr}.eng-name{white-space:normal}}
+
+/* ---------- QUICK START ---------- */
+.qs{border:1px solid var(--ink);background:var(--white);margin:0 0 16px}
+.qs-head{display:flex;align-items:center;gap:14px;padding:11px 16px;border-bottom:1px solid var(--ink);background:var(--yellow);flex-wrap:wrap}
+.qs-step{font:700 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.18em}
+.qs-head h3{margin:0;font-size:16px;font-weight:800;flex:1;letter-spacing:-.01em}
+.qs-state{font-size:11px;font-weight:800;letter-spacing:.05em;white-space:nowrap}
+.qs-body{padding:16px}
+.qs-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qs-row label{font-size:11px;font-weight:800;letter-spacing:.07em;min-width:96px}
+.qs-row select,.qs-row input[type=password]{border:1px solid var(--ink);border-radius:0;padding:9px 10px;font:inherit;font-size:12px;background:#fff;min-width:0}
+.qs-row select{flex:0 1 216px}
+.qs-row input[type=password]{flex:1 1 230px}
+.qs-btn{border:1px solid var(--ink);background:var(--yellow);color:var(--ink);padding:10px 16px;font:inherit;font-size:12px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+.qs-btn:hover{background:var(--yellow-dk)}
+.qs-btn:disabled{opacity:.55}
+.qs-alt{margin-top:13px;font-size:12px;color:var(--muted);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.qs-alt button{border:1px solid var(--ink);background:#fff;padding:7px 12px;font:inherit;font-size:11px;font-weight:800}
+.qs-alt button:hover{background:var(--yellow)}
+.qs-alt a{font-size:11px;color:var(--ink);text-underline-offset:3px}
+.qs-tip{margin-top:14px;padding:10px 13px;background:var(--paper2);border-left:3px solid var(--yellow);font-size:12px;line-height:1.7;color:#3c3c36}
+.qs-out{margin-top:12px;border:1px dashed var(--line2);background:#fbfbf6;padding:13px;font-size:12px;line-height:1.75;white-space:pre-wrap;max-height:280px;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media(max-width:720px){.qs-row label{min-width:100%}.qs-row select,.qs-row input[type=password],.qs-btn{flex:1 1 100%}}
+
+/* ---- batch result clarity ---- */
+.batch-note{padding:9px 14px;border-bottom:1px solid var(--line);background:var(--paper2);
+  font-size:11.5px;color:#4a4a42;line-height:1.65}
+.batch-note b{background:var(--yellow);padding:0 3px}
+.brow-out.wait{color:var(--muted);font-style:italic}
+.out-label{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.08em;
+  background:var(--ink);color:#fff;padding:2px 6px;margin-right:8px;vertical-align:1px}
+</style>
+</head>
+<body>
+
+<!-- ================= MASTHEAD ================= -->
+<header class="pad" id="top">
+  
+  <div class="mast-main">
+    <h1 class="big-title"><span>PROMPT</span></h1>
+    <div class="mast-right">
+      <div class="mast-photo" aria-hidden="true"></div>
+      <span class="kicker caps">An executable bilingual prompt library</span>
+      <p class="desc">填入源文本与译文，自动替换占位符、附加输出格式，生成完整 Prompt；按条目记录的模型跳转到对应平台，或直接在页面内批量运行。</p>
+      <span class="hl">INTERACTIVE EDITION ↗</span>
+      <div class="proj">ASSIGNMENT 01<br>PROMPT BANK</div>
+      <div class="proj-sub caps">54 prompts · 2 meta prompts · 3 stages</div>
+      <div class="stat-row">
+        <div class="stat-cell"><b>54</b><span>Prompts</span></div>
+        <div class="stat-cell"><b>02</b><span>Meta</span></div>
+        <div class="stat-cell"><b>03</b><span>Stages</span></div>
+        <div class="stat-cell"><b>87</b><span>Input slots</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="pad">
+
+<!-- ================= 01 WORKBENCH ================= -->
+<section class="block" id="workbench">
+  <div class="block-head"><span class="idx caps">01</span><h2>INPUT / 输入工作台</h2><span class="side caps">AUTO-SAVED IN THIS BROWSER</span></div>
+  <div class="wb-grid">
+    <div class="wb-cell"><label for="inSource">源文本 / Source Text <em>几乎所有条目都需要</em></label>
+      <textarea id="inSource" class="big" placeholder="把待翻译或待分析的原文粘贴到这里…"></textarea></div>
+    <div class="wb-cell"><label for="inTarget">译文 / Translation <em>译中纠错、译后评估需要</em></label>
+      <textarea id="inTarget" placeholder="把译文 / 待审译文粘贴到这里…"></textarea>
+      <div class="field-note">若某条需要「译文 1/2/3」而你没有分别填写，会自动用这里的译文补齐。</div></div>
+  </div>
+  <div class="wb-sub">
+    <button class="linkish" id="moreBtn" type="button">＋ 更多输入：译文 1/2/3 · 目标法域 · 附加要求</button>
+    <span class="spacer"></span>
+    <button class="btn sm" id="sampleBtn" type="button">载入示例</button>
+    <button class="btn sm" id="clearBtn" type="button">清空</button>
+    <button class="btn sm" id="cfgBtn" type="button">⚙ 配置 / CONFIG</button>
+  </div>
+
+  <div class="qs" id="quickStart">
+    <div class="qs-head">
+      <span class="qs-step">STEP 0 / 只需做一次</span>
+      <h3>让模型直接在这个页面里出结果</h3>
+      <span class="qs-state" id="qsState">检测中…</span>
+    </div>
+    <div class="qs-body">
+      <div class="qs-row">
+        <label for="qsProvider">① 选平台（与 Key 一致）</label>
+        <select id="qsProvider">
+          <option value="siliconflow">硅基流动 · 国内直连（推荐）</option>
+          <option value="openrouter">OpenRouter · 一个 Key 覆盖全部模型</option>
+          <option value="more">其他平台 / 更多设置…</option>
+        </select>
+        <label for="qsKey">② 粘 Key</label>
+        <input type="password" id="qsKey" placeholder="把 API Key 粘贴到这里（sk-…）" autocomplete="off">
+        <button class="qs-btn" id="qsSave" type="button">保存并连接 →</button>
+      </div>
+      <div class="qs-alt">
+        <span>没有 Key 或只想先看看？</span>
+        <button id="qsDemo" type="button">▶ 先试一下，看结果长什么样</button>
+        <button id="qsRetry" type="button">↻ 重试连接</button>
+        <a id="qsApply" href="https://cloud.siliconflow.cn/account/ak" target="_blank" rel="noopener">去申请一个 Key ↗</a>
+      </div>
+      <div class="qs-tip" id="qsTip">正在检测本机运行引擎…</div>
+      <div class="qs-out" id="qsOut" style="display:none"></div>
+    </div>
+  </div>
+  <div class="engine-strip" id="engineStrip">
+    <span class="eng-dot" id="engDot"></span>
+    <span class="eng-name">EMBEDDED ENGINE / 内嵌运行引擎</span>
+    <span class="eng-msg" id="engMsg">正在检测本机运行引擎…</span>
+    <button class="btn sm" id="engTestBtn" type="button">TEST / 测试连接</button>
+    <button class="btn sm" id="engSetupBtn" type="button">⚙ 引擎设置</button>
+  </div>
+  <div class="runbar">
+    <button class="btn btn-y btn-lg" id="runAllBtn" type="button">▶ RUN ALL / 一键执行全部 →</button>
+    <button class="btn btn-lg" id="run3Btn" type="button">试跑 3 条 / TRY 3</button>
+    <button class="btn btn-lg" id="genAllBtn" type="button">GENERATE ALL / 仅生成</button>
+    <button class="btn btn-lg" id="exportBtn" type="button">EXPORT .MD</button>
+  </div>
+
+  <div class="collapsible" id="morePanel">
+    <div class="cfg-grid">
+      <div><label class="caps" for="inV1">译文版本 1 / Version 1</label><textarea id="inV1" placeholder="译文版本 1…"></textarea></div>
+      <div><label class="caps" for="inV2">译文版本 2 / Version 2</label><textarea id="inV2" placeholder="译文版本 2…"></textarea></div>
+      <div><label class="caps" for="inV3">译文版本 3 / Version 3</label><textarea id="inV3" placeholder="译文版本 3…"></textarea></div>
+      <div><label class="caps" for="inLang">目标语言 / 法域</label><input type="text" id="inLang" placeholder="例：English (HK law) / 中文（内地法）">
+           <label class="caps" for="inExtra" style="margin-top:12px">附加要求 / 上下文</label>
+           <input type="text" id="inExtra" placeholder="例：面向非法律专业读者；保留条款编号"></div>
+    </div>
+  </div>
+
+
+  <div class="collapsible" id="enginePanel">
+    <div class="cfg-title">A / 运行模式 · 生成结果直接显示在本页，无需跳转</div>
+    <div class="eng-modes" id="engModes">
+      <button type="button" data-mode="auto" class="on">自动（推荐）</button>
+      <button type="button" data-mode="local">本机引擎</button>
+      <button type="button" data-mode="direct">浏览器直连 API</button>
+      <button type="button" data-mode="off">关闭（仅生成）</button>
+    </div>
+    <div class="eng-preset">
+      <div><label class="caps" for="engProvider">服务商预设 · 选择后自动填入端点与 54 条模型映射</label>
+        <select id="engProvider"><option value="openrouter">OpenRouter · 一个 Key 覆盖全部家族（推荐）</option><option value="siliconflow">硅基流动 SiliconFlow · 国内直连聚合</option><option value="deepseek">DeepSeek 官方</option><option value="qwen">阿里云百炼 / 通义千问</option><option value="zhipu">智谱 GLM</option><option value="moonshot">月之暗面 Kimi</option><option value="minimax">MiniMax</option><option value="ark">火山方舟 / 豆包</option><option value="openai">OpenAI 官方</option><option value="custom">自定义 / 本地网关</option></select></div>
+      <div><label class="caps" for="engLocalUrl">本机引擎地址</label>
+        <input type="text" id="engLocalUrl" value="http://127.0.0.1:8765">
+        <div class="field-note">由引擎托管页面时自动使用当前地址；也可用网址参数 <code class="k">?engine=</code> 覆盖端口。</div></div>
+    </div>
+    <div class="eng-test">
+      <button class="btn btn-y sm" id="engTestConn" type="button">▶ 测试连接（真实调用一次）</button>
+      <button class="btn sm" id="engApplyMap" type="button">同步引擎模型映射到本页</button>
+      <span class="caps" id="engModeLabel" style="color:var(--muted)">MODE: AUTO</span>
+    </div>
+    <div class="eng-log" id="engLog">尚未测试。点击「测试连接」会发起一次极小的真实请求，用来确认模型能否在页面内返回结果。</div>
+
+    <div class="cfg-title">B / 启用本机引擎（推荐 · 密钥不进入浏览器）</div>
+    <ol class="eng-steps">
+      <li>不用手动改任何文件：在页面顶部「快速开始」粘一个 API Key，点「保存并连接」即可。推荐 <b>OpenRouter</b> 或 <b>硅基流动</b>，一个 Key 覆盖全部 54 条模型家族。</li>
+      <li>双击 <code class="k">启动 Prompt Bank.command</code>（或终端运行 <code class="k">python3 promptbank_engine.py</code>），浏览器会打开 <code class="k">http://127.0.0.1:8765/</code>。</li>
+      <li>回到本页，状态灯变绿即已内嵌。此后点任意卡片的「▶ 页面内运行」或 RUN ALL，<b>模型生成结果会直接显示在本页</b>。</li>
+    </ol>
+    <div class="note-box">
+      <b>为什么不能把网页版对话框直接嵌进 iframe？</b> ChatGPT / Claude / 通义 / DeepSeek 等网页版都设置了 <code class="k">X-Frame-Options</code> 与 CSP <code class="k">frame-ancestors</code>，浏览器会拒绝第三方页面嵌入；即使绕过，跨域 iframe 也无法自动填入 Prompt 或读取回复。因此「在页面内生成结果」的正规方式是通过模型 API。<br>
+      本机引擎仅用 Python 标准库实现、只监听 <code class="k">127.0.0.1</code>，负责转发请求并解决跨域；<b>Key 只存在本机配置文件里，页面与浏览器都拿不到</b>。若不想启动脚本，可切到「浏览器直连 API」，但要求端点允许 CORS，且 Key 会存在本机浏览器。
+    </div>
+
+    <div class="cfg-title">C / 浏览器直连 API（不启动脚本时）</div>
+    <div class="eng-log">选择「浏览器直连 API」后，请在下方 <b>CONFIG / 配置</b> 面板 A 区填写 API Key；上方服务商预设会自动填好 Base URL 与模型映射。多数国内厂商 API 未开放浏览器跨域，遇到 CORS 报错时请改用本机引擎。</div>
+  </div>
+  <div class="collapsible" id="cfgPanel">
+    <div class="cfg-title">A / API 直接运行（可选）</div>
+    <div class="cfg-grid">
+      <div><label class="caps" for="apiBase">API Base URL · OpenAI 兼容</label><input type="text" id="apiBase" placeholder="https://api.example.com/v1"></div>
+      <div><label class="caps" for="apiKey">API Key · 仅存本机</label><input type="password" id="apiKey" placeholder="sk-..."></div>
+      <div><label class="caps" for="apiModelOverride">全局模型覆盖（留空则按下方映射逐条使用）</label><input type="text" id="apiModelOverride" placeholder="留空 = 按模型家族映射"></div>
+      <div><label class="caps" for="apiConc">并发数 / Concurrency</label><input type="number" id="apiConc" min="1" max="6" value="3"></div>
+    </div>
+
+    <div class="cfg-title">B / 模型家族 → 真实 API 模型 ID（批量运行时逐条使用对应模型）</div>
+    <table class="map-table" id="mapTable"><thead><tr><th>家族</th><th>真实模型 ID（可编辑）</th></tr></thead><tbody></tbody></table>
+
+    <div class="cfg-title">C / 平台跳转链接（{q} 为预填 Prompt 的位置，删掉即只打开首页）</div>
+    <table class="map-table" id="linkTable"><thead><tr><th>平台</th><th>URL 模板（可编辑）</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap">
+      <label class="chk"><input type="checkbox" id="cfgPrefill" checked=""> 优先使用 URL 预填 Prompt（支持 ChatGPT / Claude / Grok 等）</label>
+      <label class="chk"><input type="checkbox" id="cfgRemember"> 记住 API Key 在本机</label>
+      <label class="chk"><input type="checkbox" id="cfgAppend" checked=""> 生成时附加输出格式要求</label>
+    </div>
+    <div class="note-box">
+      卡片上的型号（Qwen3.7 Max、claude-fable-5 等）是作业里记录的测试型号，真实服务中并不存在同名模型；<b>内嵌运行</b>会按上表把它们映射到真实模型 ID，批量执行时逐条使用各自的模型。<br>
+      · <b>本机引擎</b>：配置与密钥在 promptbank_keys.json，页面只向 127.0.0.1 发请求，结果直接回显，推荐。<br>
+      · <b>跳转</b>：按模型家族推断到对应厂商网页版，仅作为备用通道；链接模板可自行修改。<br>
+      · <b>预填链接是非官方行为</b>，可能失效；因此每次跳转都会同时把完整 Prompt 复制到剪贴板。Prompt 过长时自动改为「复制 + 打开首页」。
+    </div>
+  </div>
+</section>
+
+<!-- ================= 02 TOOLBAR ================= -->
+<section class="block" id="index">
+  <div class="block-head"><span class="idx caps">02</span><h2>INDEX / 提示词索引</h2><span class="side caps" id="indexCount">54 ENTRIES</span></div>
+  <div class="toolbar">
+    <div class="tabs" id="stageSeg">
+      <button type="button" class="on" data-stage="all">全部</button>
+      <button type="button" data-stage="pre">译前</button>
+      <button type="button" data-stage="prod">译中</button>
+      <button type="button" data-stage="post">译后</button>
+    </div>
+    <div class="tabs" id="langSeg">
+      <button type="button" class="on" data-lang="all">全部</button>
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="cn">CN</button>
+      <button type="button" data-lang="compare">双语对照</button>
+    </div>
+    <div class="search">
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex:none"><circle cx="6.8" cy="6.8" r="4.6" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.3 10.3L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+      <input id="searchInput" type="search" placeholder="搜索编号 / 场景 / 提示词 / 模型…" autocomplete="off">
+      <span class="hit-count" id="hitCount"></span>
+    </div>
+    <button class="btn sm" id="appendBtn" type="button">✓ 附加输出格式</button>
+    <button class="btn sm" id="printBtn" type="button">打印</button>
+  </div>
+  <div id="cardArea"></div>
+</section>
+
+<!-- ================= 03 BATCH ================= -->
+<div class="batch" id="batchPanel">
+  <div class="batch-head"><h3 id="batchTitle">BATCH / 批量执行</h3>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span class="bstat" id="batchStat">0 / 0</span>
+      <button class="btn btn-y sm" id="batchAbort" type="button">ABORT</button>
+      <button class="btn sm" id="batchClose" type="button" style="border-color:#fff;color:#fff">CLOSE</button>
+    </div></div>
+  <div class="progress"><i id="batchBar"></i></div>
+  <div class="batch-note" id="batchNote"></div>
+  <div class="batch-list" id="batchList"></div>
+  <div class="batch-foot">
+    <button class="btn btn-y sm" id="batchExportMd" type="button">导出结果 .MD</button>
+    <button class="btn sm" id="batchExportJson" type="button">导出结果 .JSON</button>
+    <button class="btn sm" id="batchCopyAll" type="button">复制全部结果</button>
+    <button class="btn sm" id="batchRetry" type="button">重试失败项</button>
+  </div>
+</div>
+
+<!-- ================= 04 META ================= -->
+<section class="block" id="metaSec">
+  <div class="block-head"><span class="idx caps">04</span><h2>META PROMPTS / 元提示词</h2><span class="side caps">2 ITEMS · KEPT FROM SOURCE DOC</span></div>
+  <div class="meta-grid" id="metaArea"></div>
+</section>
+<footer class="caps">
+  <span>© 2026 · SOURCE: 陈铱娜_ASSIGNMENT 1 PROMPT BANK.DOCX &nbsp;|&nbsp; PRIVACY: KEYS STAY LOCAL &nbsp;|&nbsp; RESULTS IN-PAGE</span>
+  <span class="flinks">
+    <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">CHATGPT</a>
+    <a href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">CLAUDE</a>
+    <a href="https://chat.deepseek.com/" target="_blank" rel="noopener noreferrer">DEEPSEEK</a>
+    <a href="https://chat.qwen.ai/" target="_blank" rel="noopener noreferrer">QWEN</a>
+  </span>
+</footer>
+</div>
+
+<div class="fab" id="fab" role="button" tabindex="0" aria-label="菜单"><i></i><i></i></div>
+<div class="fab-menu" id="fabMenu">
+  <button type="button" data-fab="run">▶ RUN ALL / 一键执行</button>
+  <button type="button" data-fab="engine">⚡ ENGINE / 内嵌引擎</button>
+  <button type="button" data-fab="cfg">⚙ CONFIG / 配置</button>
+  <button type="button" data-fab="top">↑ BACK TO TOP</button>
+</div>
+
+<!-- ================= DRAWER ================= -->
+<div class="mask" id="drawerMask"></div>
+<aside class="drawer" id="drawer" aria-label="生成结果">
+  <div class="dw-head"><div><h3 id="dwTitle">完整 Prompt</h3><p id="dwSub">—</p></div>
+    <button class="dw-x" id="dwClose" type="button" aria-label="关闭">×</button></div>
+  <div class="dw-body">
+    <div class="dw-model">
+      <div><label>测试用 LLM 模型（可修改并保存）</label><input type="text" id="dwModel"></div>
+      <div><label>Version</label><input type="text" id="dwVer"></div>
+    </div>
+    <div class="dw-api-model" id="dwApiModel"></div>
+    <div class="dw-warn" id="dwWarn" style="display:none"></div>
+    <div><div class="dw-label">可执行 Prompt（生成后可继续编辑）</div>
+      <textarea id="dwPrompt" class="dw-prompt"></textarea></div>
+    <div><div class="dw-label">一键跳转到对应模型 ↗（会同时复制）</div>
+      <div class="dw-links" id="dwLinks"></div></div>
+    <div id="dwResultBox" style="display:none"><div class="dw-label">模型生成结果 · 直接显示在本页</div>
+      <div class="dw-result" id="dwResult"></div>
+      <div class="dw-meta" id="dwResultMeta"></div>
+      <div class="dw-result-acts"><button class="btn sm" id="dwCopyResult" type="button">复制生成结果</button></div></div>
+  </div>
+  <div class="dw-foot">
+    <button class="btn btn-y" id="dwBuild" type="button">重新生成</button>
+    <button class="btn" id="dwCopy" type="button">复制</button>
+    <button class="btn" id="dwRun" type="button">运行</button>
+    <button class="btn" id="dwDownload" type="button">下载</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script id="bank-data" type="application/json">[{"id": "pre-1.1-en", "stage": "pre", "stageName": "Pre-Production", "lang": "EN", "no": "1.1", "scene": "Source text comprehension", "prompt": "Read the following passage carefully and summarize its topic and main idea. [xxxxxxxx]", "slots": ["source"], "format": "One-paragraph summary (≤80 words); plus 3–5 keywords", "model": "Qwen3.7 Max", "version": "3.0", "note": "司南竞技场比较可得：Qwen3.7 Max较于GLM 5.1模型，概括分析更加结构化、条理清晰、解释会结合具体实例。"}, {"id": "pre-1.2-en", "stage": "pre", "stageName": "Pre-Production", "lang": "EN", "no": "1.2", "scene": "Source text comprehension", "prompt": "Read the following passage paragraph by paragraph, summarize the main idea of each paragraph, and present the results in a clear mind map. [xxxxxxxx]", "slots": ["source"], "format": "Tree mind map; ≤15 words per node, labelled by paragraph number", "model": "muse-wonder-max", "version": "4.0", "note": "较于mistral-large-4模型，会引用原文。"}, {"id": "pre-1.3-en", "stage": "pre", "stageName": "Pre-Production", "lang": "EN", "no": "1.3", "scene": "Source text comprehension", "prompt": "Analyze the author’s stance, attitude, purpose, and writing style in the following passage. Also, describe its target audience. [xxxxxxxx]", "slots": ["source"], "format": "Four-field table: Stance | Attitude | Purpose | Target reader profile; each with textual evidence", "model": "claude-opus-5-medium", "version": "2.0", "note": "额外给出了值得注意的隐含立场"}, {"id": "pre-2.1-en", "stage": "pre", "stageName": "Pre-Production", "lang": "EN", "no": "2.1", "scene": "Text type and terminology analysis", "prompt": "Identify the genre and language style of the following passage, and explain the reasons for your assessment. [xxxxxxxx]", "slots": ["source"], "format": "Three-column table: Item | Conclusion | Evidence (quote from source)", "model": "Seed-2.0-Pro", "version": "3.0", "note": "判断依据采用结构化语言，且分析更有条理。"}, {"id": "pre-2.2-en", "stage": "pre", "stageName": "Pre-Production", "lang": "EN", "no": "2.2", "scene": "Text type and terminology analysis", "prompt": "Identify difficult words and technical terms in the passage. Provide their bilingual definitions, parts of speech, and example sentences in a glossary. [xxxxxxxx]", "slots": ["source"], "format": "Markdown glossary: Term | POS | Bilingual definition | Example sentence | Context note", "model": "Seed-2.1-Pro", "version": "1.0", "note": "较之MiniMax M2.7，会额外给出语境提示和正式文体通用难词/固定搭配 Formal General Vocabulary & Collocations"}, {"id": "pre-2.3-en", "stage": "pre", "stageName": "Pre-Production", "lang": "EN", "no": "2.3", "scene": "Text type and terminology analysis", "prompt": "Recommend an appropriate style for translating the legal text. Provide bilingual definitions of relevant legal terms under Mainland Chinese and Hong Kong law. [xxxxxxxx]", "slots": ["source"], "format": "Two sections: (1) style recommendations as bullets; (2) term table: Term | Mainland law definition | Hong Kong law definition", "model": "hy3", "version": "1.0", "note": "较之claude-opus-4-6，hy3的翻译建议更落地，例如“长句处理，逻辑显化”，且在香港法律下解释得更为细致"}, {"id": "pre-3.1-en", "stage": "pre", "stageName": "Pre-Production", "lang": "EN", "no": "3.1", "scene": "Background knowledge explanation", "prompt": "List the background knowledge needed to understand the passage. [xxxxxxxx]", "slots": ["source"], "format": "Numbered list; one sentence per item, each tagged with its source location", "model": "qwen3.7-max", "version": "2.0", "note": "qwen3.7-max的背景知识点介绍和语段联系更为紧密，例如“美国法院更倾向于文本中提到的 \"appropriate to the contemporary circumstances\"。当社会价值观、经济条件或宪法理解发生重大变化时，......”"}, {"id": "pre-3.2-en", "stage": "pre", "stageName": "Pre-Production", "lang": "EN", "no": "3.2", "scene": "Background knowledge explanation", "prompt": "Explain the key background knowledge in detail and present it bilingually. Suggest how to localize the translation for the target audience without changing the original meaning. [xxxxxxxx]", "slots": ["source"], "format": "Bilingual parallel two-column layout + 3 localisation suggestions", "model": "Qwen3.6 35B A3B", "version": "2.0", "note": "DeepSeek V4 Pro与GLM 5.2均给出过于晦涩介绍；而较之DeepSeek V4 Flash，Qwen3.6 35B A3B能给出平行文本的编排，更适合双语背景科普。"}, {"id": "pre-3.3-en", "stage": "pre", "stageName": "Pre-Production", "lang": "EN", "no": "3.3", "scene": "Background knowledge explanation", "prompt": "Drawing on legal translation knowledge, identify and explain the relevant legal provisions and legal background under Mainland Chinese and Hong Kong law. [xxxxxxxx]", "slots": ["source"], "format": "Legal provision table: Jurisdiction | Provision | Key points | Implications for translation", "model": "GLM 5.1", "version": "3.0", "note": "GLM 5.1在给出法条基础上，还列举了回归前后的法案对比，非常有实践性，且给出经典案件便于理解。例如：香港回归后，终审法院在多起标志性案件（如1999年的吴嘉玲案）中，运用了这一原则......"}, {"id": "pre-1.1-cn", "stage": "pre", "stageName": "Pre-Production", "lang": "CN", "no": "1.1", "scene": "吃透原文：概括语段大意和主旨，把握情感色彩", "prompt": "请仔细阅读以下语段 [xxxxxxxx]，概括其主题与核心主旨。", "slots": ["source"], "format": "一段式摘要 ≤80 字；另列关键词 3–5 个", "model": "Qwen3.7 Max", "version": "3.0", "note": "司南竞技场比较可得：Qwen3.7 Max较于GLM 5.1模型，概括分析更加结构化、条理清晰、解释会结合具体实例。"}, {"id": "pre-1.2-cn", "stage": "pre", "stageName": "Pre-Production", "lang": "CN", "no": "1.2", "scene": "吃透原文：概括语段大意和主旨，把握情感色彩", "prompt": "请逐段阅读以下语段 [xxxxxxxx] ，概括每一段的主旨，并以清晰的思维导图形式呈现。", "slots": ["source"], "format": "树状思维导图；每节点 ≤15 字，标注段落号", "model": "muse-wonder-max", "version": "4.0", "note": "较于mistral-large-4模型，会引用原文。"}, {"id": "pre-1.3-cn", "stage": "pre", "stageName": "Pre-Production", "lang": "CN", "no": "1.3", "scene": "吃透原文：概括语段大意和主旨，把握情感色彩", "prompt": "请分析以下语段 [xxxxxxxx] 中作者的立场、态度、写作目的及其表达方式，并分析目标读者画像。", "slots": ["source"], "format": "四字段表格：立场｜态度｜写作目的｜目标读者画像；每项附原文依据", "model": "claude-opus-5-medium", "version": "2.0", "note": "额外给出了值得注意的隐含立场"}, {"id": "pre-2.1-cn", "stage": "pre", "stageName": "Pre-Production", "lang": "CN", "no": "2.1", "scene": "识文辨词：判断语言风格、讲解专业术语", "prompt": "请判断以下语段 [xxxxxxxx] 的文本体裁与语言风格，并说明判断依据。", "slots": ["source"], "format": "三栏表：判断项｜结论｜依据（引原文）", "model": "Seed-2.0-Pro", "version": "3.0", "note": "判断依据采用结构化语言，且分析更有条理。"}, {"id": "pre-2.2-cn", "stage": "pre", "stageName": "Pre-Production", "lang": "CN", "no": "2.2", "scene": "识文辨词：判断语言风格、讲解专业术语", "prompt": "列出语段涉及的难词与专业术语，给出其双语释义、词性、例句，输出glossary。", "slots": [], "format": "Markdown 术语表：术语｜词性｜双语释义｜例句｜语境提示", "model": "Seed-2.1-Pro", "version": "1.0", "note": "较之MiniMax M2.7，会额外给出语境提示和正式文体通用难词/固定搭配 Formal General Vocabulary & Collocations"}, {"id": "pre-2.3-cn", "stage": "pre", "stageName": "Pre-Production", "lang": "CN", "no": "2.3", "scene": "识文辨词：判断语言风格、讲解专业术语", "prompt": "给出法律译文风格建议，并给出法律语篇涉及的术语分别在大陆及香港法律的双语释义。", "slots": [], "format": "分节输出：①风格建议要点 ②术语对照表：术语｜大陆法释义｜香港法释义", "model": "hy3", "version": "1.0", "note": "较之claude-opus-4-6，hy3的翻译建议更落地，例如“长句处理，逻辑显化”，且在香港法律下解释得更为细致"}, {"id": "pre-3.1-cn", "stage": "pre", "stageName": "Pre-Production", "lang": "CN", "no": "3.1", "scene": "补齐理解所需的背景知识", "prompt": "列出语段涉及的背景知识点。", "slots": [], "format": "编号清单；每条 1 句，并标注关联原文位置", "model": "qwen3.7-max", "version": "2.0", "note": "qwen3.7-max的背景知识点介绍和语段联系更为紧密，例如“美国法院更倾向于文本中提到的 \"appropriate to the contemporary circumstances\"。当社会价值观、经济条件或宪法理解发生重大变化时，......”"}, {"id": "pre-3.2-cn", "stage": "pre", "stageName": "Pre-Production", "lang": "CN", "no": "3.2", "scene": "补齐理解所需的背景知识", "prompt": "针对重要背景知识，详细科普介绍，并以双语罗列。确保翻译时能够本地化。", "slots": [], "format": "中英双语平行两栏 + 本地化建议 3 条", "model": "Qwen3.6 35B A3B", "version": "2.0", "note": "DeepSeek V4 Pro与GLM 5.2均给出过于晦涩介绍；而较之DeepSeek V4 Flash，Qwen3.6 35B A3B能给出平行文本的编排，更适合双语背景科普。"}, {"id": "pre-3.3-cn", "stage": "pre", "stageName": "Pre-Production", "lang": "CN", "no": "3.3", "scene": "补齐理解所需的背景知识", "prompt": "请结合大陆与香港法律翻译知识，梳理其中涉及的法律法条背景知识。", "slots": [], "format": "法条对照表：法域｜法条名称｜条文要点｜对翻译的影响", "model": "GLM 5.1", "version": "3.0", "note": "GLM 5.1在给出法条基础上，还列举了回归前后的法案对比，非常有实践性，且给出经典案件便于理解。例如：香港回归后，终审法院在多起标志性案件（如1999年的吴嘉玲案）中，运用了这一原则......"}, {"id": "prod-1.1-en", "stage": "prod", "stageName": "Production", "lang": "EN", "no": "1.1", "scene": "Translation Generation and Reference", "prompt": "Translate the source text [xxxxx] into three stylistically distinct target versions. Preserve all core information without addition or omission.", "slots": ["source"], "format": "Three sections (Version 1/2/3), each with a style label; end with a comparison summary table", "model": "claude-fable-5", "version": "1.0", "note": "较之于gpt-6-luna-max，claude各版本翻译综合准确度更高，且给出了各版本对比之小结。"}, {"id": "prod-1.2-en", "stage": "prod", "stageName": "Production", "lang": "EN", "no": "1.2", "scene": "Translation Generation and Reference", "prompt": "Compare the differences among the three translations above, and state their respective strengths, weaknesses and applicable scenarios.", "slots": [], "format": "Five-column table: Version | Key differences | Strengths | Weaknesses | Use cases", "model": "gpt-5.6-terra-xhigh", "version": "4.0", "note": "gpt-5.6-terra-xhigh版本更凝练，较之于其他模型，结构也更紧密，信息密度高。"}, {"id": "prod-1.3-en", "stage": "prod", "stageName": "Production", "lang": "EN", "no": "1.3", "scene": "Translation Generation and Reference", "prompt": "Translate the legal source text [xxxxx]. Ensure accurate and consistent legal terminology, clear clause logic, rigorous language and compliance with drafting conventions of the target jurisdiction.", "slots": ["source"], "format": "Target text only; keep clause numbering and gloss key terms on first occurrence", "model": "DeepSeek V4 Flash", "version": "2.0", "note": "速度优于seed，且译文可读性更高。"}, {"id": "prod-2.1-en", "stage": "prod", "stageName": "Production", "lang": "EN", "no": "2.1", "scene": "Translation Error Detection and Correction", "prompt": "Read through the translation, check for mistranslation, omission, spelling and grammatical errors against the source text [xxxxx], and directly provide the revised translation. Source text: [xxxxx]; Translation: [xxxxx].", "slots": ["source", "source", "target"], "format": "Error log table: Location | Error type | Source | Original translation | Revision; then the full revised translation", "model": "gpt-6-luna-max", "version": "2.0", "note": "学术专业度高，生成速度快"}, {"id": "prod-2.2-en", "stage": "prod", "stageName": "Production", "lang": "EN", "no": "2.2", "scene": "Translation Error Detection and Correction", "prompt": "Locate semantic deviations, improper sentence structures, unnatural expressions, inconsistent style and contextual coherence issues in translation [xxxxx]. Explain the causes and revise the text.Source text: [xxxxx]", "slots": ["target", "source"], "format": "Sentence-by-sentence table: No. | Issue | Cause | Suggestion | Revised", "model": "vierra", "version": "3.0", "note": "逐句修正，给出的建议可落地"}, {"id": "prod-2.3-en", "stage": "prod", "stageName": "Production", "lang": "EN", "no": "2.3", "scene": "Translation Error Detection and Correction", "prompt": "Review the legal translation [xxxxx], remove ambiguities and ensure rigorous wording in line with legal norms.Source text: [xxxxx]", "slots": ["target", "source"], "format": "Issue table sorted by severity + revision comparison table + points requiring lawyer confirmation", "model": "MiniMax M3", "version": "1.0", "note": "会给出问题严重程度优先级及修改对照表。"}, {"id": "prod-3.1-en", "stage": "prod", "stageName": "Production", "lang": "EN", "no": "3.1", "scene": "Translation Quality Assessment", "prompt": "Evaluate the quality of translation [xxxxx] briefly based on the criteria of \"faithfulness, expressiveness and elegance\", and point out its main strengths and weaknesses. Source text: [xxxxx]; Translation version 1: [xxxxx]；Translation version 2: [xxxxx]；Translation version 3: [xxxxx]", "slots": ["target", "source", "v1", "v2", "v3"], "format": "Faithfulness / Expressiveness / Elegance score table (1–5) + 2 strengths and 2 weaknesses + top recommendation", "model": "Qwen3.6 35B A3B", "version": "4.0", "note": "优点是给出综合推荐与详细评估。并给出首选推荐，评分维度多元。"}, {"id": "prod-3.2-en", "stage": "prod", "stageName": "Production", "lang": "EN", "no": "3.2", "scene": "Translation Quality Assessment", "prompt": "Score each translation version, analyse defects item by item and propose optimization plans. Evaluation criteria: semantic accuracy, information completeness, linguistic fluency, stylistic consistency and target-readership suitability. Source text: [xxxxx]; Translation version 1: [xxxxx]；Translation version 2: [xxxxx]；Translation version 3: [xxxxx]", "slots": ["source", "v1", "v2", "v3"], "format": "Scoring matrix (5 criteria × 3 versions) + itemised defect list + optimisation plan", "model": "grok-4.6-low", "version": "2.0", "note": "较之qwen，打分更严格，所以或许更有信服力。"}, {"id": "prod-3.3-en", "stage": "prod", "stageName": "Production", "lang": "EN", "no": "3.3", "scene": "Translation Quality Assessment", "prompt": "Evaluate the legal translation [xxxxx] against \"faithfulness, expressiveness and elegance\". Strictly adhere to the original meaning and guarantee the rigour and standardization of legal text. Source text: [xxxxx].", "slots": ["target", "source"], "format": "Score table + risk checklist (terminology / clause logic / rigour) + verdict", "model": "vierra", "version": "3.0", "note": "gpt-6-luna-max、muse-spark-1.3-max效果都不尽人意，把简单事物复杂化。"}, {"id": "prod-1.1-cn", "stage": "prod", "stageName": "Production", "lang": "CN", "no": "1.1", "scene": "译文生成与参考", "prompt": "请将以下源文本翻译为目标语言，并提供三个不同版本的译文。各版本应在表达方式或文体上有所区别，同时准确、完整地保留原文的核心信息，不得擅自增删内容。源文本：[xxxxx]；", "slots": ["source"], "format": "译文 1/2/3 分节，各附风格标签；末尾附差异小结表", "model": "claude-fable-5", "version": "1.0", "note": "较之于gpt-6-luna-max，claude各版本翻译综合准确度更高，且给出了各版本对比之小结。"}, {"id": "prod-1.2-cn", "stage": "prod", "stageName": "Production", "lang": "CN", "no": "1.2", "scene": "译文生成与参考", "prompt": "对比上述生成的各版本译文差异，指出各版本的主要优缺点，并说明其适用场景。", "slots": [], "format": "五列对照表：版本｜主要差异｜优点｜不足｜适用场景", "model": "gpt-5.6-terra-xhigh", "version": "4.0", "note": "gpt-5.6-terra-xhigh版本更凝练，较之于其他模型，结构也更紧密，信息密度高。"}, {"id": "prod-1.3-cn", "stage": "prod", "stageName": "Production", "lang": "CN", "no": "1.3", "scene": "译文生成与参考", "prompt": "请翻译以下法律源文本[xxxxx]，确保法律术语使用准确、前后一致，条款逻辑清晰，语言严谨，并符合目标法域的法律文本表达习惯。", "slots": ["source"], "format": "仅输出译文正文；保留条款编号，术语首次出现括注原文", "model": "DeepSeek V4 Flash", "version": "2.0", "note": "速度优于seed，且译文可读性更高。"}, {"id": "prod-2.1-cn", "stage": "prod", "stageName": "Production", "lang": "CN", "no": "2.1", "scene": "识别并修正译文错误", "prompt": "请通读译文，对照源文本检查明显的错译、漏译、误译、拼写错误及语法问题，并直接给出修正后的译文。源文本：[xxxxx]；译文：[xxxxx]。", "slots": ["source", "target"], "format": "错误清单表：位置｜问题类型｜原文｜原译｜改译；后附完整修订译文", "model": "gpt-6-luna-max", "version": "2.0", "note": "学术专业度高，生成速度快"}, {"id": "prod-2.2-cn", "stage": "prod", "stageName": "Production", "lang": "CN", "no": "2.2", "scene": "识别并修正译文错误", "prompt": "定位译文[xxxxx] 语义偏差、句式不当、表达不自然、文风不一致及上下文衔接问题，说明错误成因并修改。源文本：[xxxxx]", "slots": ["target", "source"], "format": "逐句对照表：句号｜问题描述｜成因｜修改建议｜修改后", "model": "vierra", "version": "3.0", "note": "逐句修正，给出的建议可落地"}, {"id": "prod-2.3-cn", "stage": "prod", "stageName": "Production", "lang": "CN", "no": "2.3", "scene": "识别并修正译文错误", "prompt": "核查法律译文[xxxxx]，修正歧义，保证表述符合法律规范且表述严谨。源文本：[xxxxx]", "slots": ["target", "source"], "format": "按严重程度排序的问题表 + 修改对照表 + 需律师确认清单", "model": "MiniMax M3", "version": "1.0", "note": "会给出问题严重程度优先级及修改对照表。"}, {"id": "prod-3.1-cn", "stage": "prod", "stageName": "Production", "lang": "CN", "no": "3.1", "scene": "译文质检评估", "prompt": "请依据“信、达、雅”标准，简要评估各版本译文质量，指出主要优缺点。源文本：[xxxxx]；译文1：[xxxxx]；译文2：[xxxxx]；译文3；[xxxxx]", "slots": ["source", "v1", "v2", "v3"], "format": "信/达/雅三维评分表（1–5 分）+ 优缺点各 2 条 + 首选推荐", "model": "Qwen3.6 35B A3B", "version": "4.0", "note": "优点是给出综合推荐与详细评估。并给出首选推荐，评分维度多元。"}, {"id": "prod-3.2-cn", "stage": "prod", "stageName": "Production", "lang": "CN", "no": "3.2", "scene": "译文质检评估", "prompt": "为各版本译文打分，逐条评析缺陷并提供优化方案。评分标准：语义准确性、信息完整性、语言流畅度、文体一致性和目标读者适配度源文本：[xxxxx]；译文1：[xxxxx]；译文2：[xxxxx]；译文3；[xxxxx]；", "slots": ["source", "v1", "v2", "v3"], "format": "评分矩阵（5 维度 × 3 版本）+ 逐条缺陷清单 + 优化方案", "model": "grok-4.6-low", "version": "2.0", "note": "较之qwen，打分更严格，所以或许更有信服力。"}, {"id": "prod-3.3-cn", "stage": "prod", "stageName": "Production", "lang": "CN", "no": "3.3", "scene": "译文质检评估", "prompt": "对照信达雅评析法律译文，严守原意准确，保障法律文本严谨规范。源文本：[xxxxx]；译文：[xxxxx]", "slots": ["source", "target"], "format": "评分表 + 风险点清单（术语/条款逻辑/严谨性）+ 结论", "model": "vierra", "version": "3.0", "note": "gpt-6-luna-max、muse-spark-1.3-max效果都不尽人意，把简单事物复杂化。"}, {"id": "post-1.1-en", "stage": "post", "stageName": "Post-Production", "lang": "EN", "no": "1.1", "scene": "Evaluate the readability of the translation from the target reader’s perspective.", "prompt": "Evaluate the readability of the translation from the target reader’s perspective and provide no less than three feedback comments. Source text: [xxxxx]; Translation text: [xxxxx]", "slots": ["source", "target"], "format": "Target reader profile (1 paragraph) + overall rating + ≥3 feedback items: Issue | Impact | Suggestion", "model": "glm-5.1", "version": "2.0", "note": "较之step-5-preview，会先详细给出目标读者画像，再展开可读性总体评价等分析。"}, {"id": "post-1.2-en", "stage": "post", "stageName": "Post-Production", "lang": "EN", "no": "1.2", "scene": "Evaluate the readability of the translation from the target reader’s perspective.", "prompt": "Assess the reading experience from the target reader’s perspective, and list potential comprehension barriers and optimization directions. Source text: [xxxxx]; Translation text: [xxxxx]", "slots": ["source", "target"], "format": "Comprehension barrier table: Excerpt | Barrier type | Cause | Optimisation", "model": "gpt-5.6-sol-medium", "version": "3.0", "note": "较之qwen3.8-27b，给出的理解障碍更贴合实际情境、如““先前已决案件”略显翻译腔”"}, {"id": "post-1.3-en", "stage": "post", "stageName": "Post-Production", "lang": "EN", "no": "1.3", "scene": "Evaluate the readability of the translation from the target reader’s perspective.", "prompt": "Review the following legal translation from the perspective of legal professionals, and check whether the clauses are expressed clearly, accurately and free of ambiguity.Source text: [xxxxx]; Translation text: [xxxxx]", "slots": ["source", "target"], "format": "Clause review table: Clause no. | Clarity | Accuracy | Ambiguity | Revision suggestion", "model": "claude-haiku-4-5-20251001", "version": "2.0", "note": "较之gpt-5.6-sol-xhigh，专业程度更强"}, {"id": "post-2.1-en", "stage": "post", "stageName": "Post-Production", "lang": "EN", "no": "2.1", "scene": "Provide delivery feedback on the translation from the client’s perspective.", "prompt": "Evaluate whether the translation is accurate, complete and readable from the client’s perspective, and put forward at least three specific revision suggestions.Source text: [xxxxx]; Translation text: [xxxxx]", "slots": ["source", "target"], "format": "One-sentence delivery verdict + ≥3 numbered revision suggestions (prioritised)", "model": "Qwen3.7 Max", "version": "1.0", "note": "DeepSeek V4 Flash列举过于复杂，没有可读性"}, {"id": "post-2.2-en", "stage": "post", "stageName": "Post-Production", "lang": "EN", "no": "2.2", "scene": "Provide delivery feedback on the translation from the client’s perspective.", "prompt": "Simulate a client’s review of the translation, assess its compliance with project requirements and delivery standards, and identify revision priorities.Source text: [xxxxx]; Translation text: [xxxxx]", "slots": ["source", "target"], "format": "Client review note (verdict / compliant / non-compliant) + P0/P1/P2 revision priority list", "model": "MiniMax M3", "version": "3.0", "note": "模拟给出客户审阅书及回稿意见"}, {"id": "post-2.3-en", "stage": "post", "stageName": "Post-Production", "lang": "EN", "no": "2.3", "scene": "Provide delivery feedback on the translation from the client’s perspective.", "prompt": "Examine the following legal translation from the perspective of a law firm’s client; inspect legal terminology, clause wording, internal consistency and compliance with project requirements, and mark issues requiring further confirmation by legal counsel.Source text: [xxxxx]; Translation text: [xxxxx]", "slots": ["source", "target"], "format": "Review memo: Scope | Findings | Risk level | Points for lawyer confirmation | Conclusion", "model": "Kimi K2.6", "version": "2.0", "note": "总结译文审阅备忘录"}, {"id": "post-3.1-en", "stage": "post", "stageName": "Post-Production", "lang": "EN", "no": "3.1", "scene": "Review and summarize this translation, and extract reusable assets.", "prompt": "Extract reusable translations or expressions from this translation and briefly illustrate their applicable contexts.Source text: [xxxxx]; Translation text: [xxxxx]", "slots": ["source", "target"], "format": "Asset table: Source expression | Recommended rendering | Applicable context | Caveats", "model": "claude-opus-5.5", "version": "2.0", "note": "会进一步提炼句型，同时辩证看待建议入库的术语（译文不一定完美）"}, {"id": "post-3.2-en", "stage": "post", "stageName": "Post-Production", "lang": "EN", "no": "3.2", "scene": "Review and summarize this translation, and extract reusable assets.", "prompt": "Compile a concise style guide based on this translation to unify sentence structures and word preferences.Source text: [xxxxx]; Translation text: [xxxxx]", "slots": ["source", "target"], "format": "Style guide (≤10 items): Sentence patterns | Wording preferences | Don'ts | Examples", "model": "MiniMax M2.7", "version": "1.0", "note": "较之 step-5-preview，MiniMax M2.7 归纳的风格规范更简洁有条理，句式与用词偏好提炼更贴合本次译文。"}, {"id": "post-3.3-en", "stage": "post", "stageName": "Post-Production", "lang": "EN", "no": "3.3", "scene": "Review and summarize this translation, and extract reusable assets.", "prompt": "Extract key legal terms and validated translations from this legal translation, create a reusable bilingual glossary, and summarize three legal translation techniques for continued use.Source text: [xxxxx]; Translation text: [xxxxx]", "slots": ["source", "target"], "format": "Bilingual glossary: Term | Rendering | Jurisdiction | Basis + 3 legal translation techniques", "model": "DeepSeek V4 Pro", "version": "2.0", "note": "较之 GLM 5.2，DeepSeek V4 Pro 提炼的双语术语表释义更准确，能补充目标法域的等效译法，且总结的法律翻译技巧更具操作性。"}, {"id": "post-1.1-cn", "stage": "post", "stageName": "Post-Production", "lang": "CN", "no": "1.1", "scene": "从目标读者视角，评价译文的可读性", "prompt": "以目标读者角度，评价译文可读性并给出三条以上的反馈评价。源文本：[xxxxx]；译文：[xxxxx]", "slots": ["source", "target"], "format": "目标读者画像 1 段 + 总体评分 + ≥3 条反馈：问题｜影响｜建议", "model": "glm-5.1", "version": "2.0", "note": "较之step-5-preview，会先详细给出目标读者画像，再展开可读性总体评价等分析。"}, {"id": "post-1.2-cn", "stage": "post", "stageName": "Post-Production", "lang": "CN", "no": "1.2", "scene": "从目标读者视角，评价译文的可读性", "prompt": "以目标读者角度评估阅读体验，列出可能存在的理解障碍与优化方向。源文本：[xxxxx]；译文：[xxxxx]", "slots": ["source", "target"], "format": "理解障碍表：译文片段｜障碍类型｜成因｜优化方向", "model": "gpt-5.6-sol-medium", "version": "3.0", "note": "较之qwen3.8-27b，给出的理解障碍更贴合实际情境、如““先前已决案件”略显翻译腔”"}, {"id": "post-1.3-cn", "stage": "post", "stageName": "Post-Production", "lang": "CN", "no": "1.3", "scene": "从目标读者视角，评价译文的可读性", "prompt": "请从法律专业读者的角度审阅以下法律译文，检查条款表述是否清晰、准确且存在歧义。源文本：[xxxxx]；译文：[xxxxx]", "slots": ["source", "target"], "format": "条款审阅表：条款号｜清晰度｜准确性｜歧义点｜修改建议", "model": "claude-haiku-4-5-20251001", "version": "2.0", "note": "较之gpt-5.6-sol-xhigh，专业程度更强"}, {"id": "post-2.1-cn", "stage": "post", "stageName": "Post-Production", "lang": "CN", "no": "2.1", "scene": "从客户视角，提供译文交付反馈", "prompt": "请从客户视角评价译文是否准确、完整、易读，并提出至少三条具体的修改建议。源文本：[xxxxx]；译文：[xxxxx]", "slots": ["source", "target"], "format": "交付结论 1 句 + ≥3 条编号修改建议（标注优先级）", "model": "Qwen3.7 Max", "version": "1.0", "note": "DeepSeek V4 Flash列举过于复杂，没有可读性"}, {"id": "post-2.2-cn", "stage": "post", "stageName": "Post-Production", "lang": "CN", "no": "2.2", "scene": "从客户视角，提供译文交付反馈", "prompt": "请模拟客户审阅译文，评估其是否符合项目要求及交付标准，并指出需要修改的优先事项。源文本：[xxxxx]；译文：[xxxxx]", "slots": ["source", "target"], "format": "客户审阅书（结论/符合项/不符合项）+ P0/P1/P2 修改优先清单", "model": "MiniMax M3", "version": "3.0", "note": "模拟给出客户审阅书及回稿意见"}, {"id": "post-2.3-cn", "stage": "post", "stageName": "Post-Production", "lang": "CN", "no": "2.3", "scene": "从客户视角，提供译文交付反馈", "prompt": "请从律所客户视角审阅以下法律译文，检查法律术语、条款表述、前后一致性及项目要求的符合情况，并标出需要律师进一步确认的问题。源文本：[xxxxx]；译文：[xxxxx]", "slots": ["source", "target"], "format": "审阅备忘录：范围｜发现｜风险等级｜需律师确认清单｜结论", "model": "Kimi K2.6", "version": "2.0", "note": "总结译文审阅备忘录"}, {"id": "post-3.1-cn", "stage": "post", "stageName": "Post-Production", "lang": "CN", "no": "3.1", "scene": "复盘总结本次译文，提炼可复用资产", "prompt": "请根据本次译文，提炼值得复用的译法或表达，并简要说明其适用语境。源文本：[xxxxx]；译文：[xxxxx]", "slots": ["source", "target"], "format": "资产表：源语表达｜推荐译法｜适用语境｜注意事项", "model": "claude-opus-5.5", "version": "2.0", "note": "会进一步提炼句型，同时辩证看待建议入库的术语（译文不一定完美）"}, {"id": "post-3.2-cn", "stage": "post", "stageName": "Post-Production", "lang": "CN", "no": "3.2", "scene": "复盘总结本次译文，提炼可复用资产", "prompt": "根据本次译文，整理简短风格规范，统一句式与用词偏好。源文本：[xxxxx]；译文：[xxxxx]", "slots": ["source", "target"], "format": "风格指南 ≤10 条：句式偏好｜用词偏好｜禁忌｜示例", "model": "MiniMax M2.7", "version": "1.0", "note": "较之 step-5-preview，MiniMax M2.7 归纳的风格规范更简洁有条理，句式与用词偏好提炼更贴合本次译文。"}, {"id": "post-3.3-cn", "stage": "post", "stageName": "Post-Production", "lang": "CN", "no": "3.3", "scene": "复盘总结本次译文，提炼可复用资产", "prompt": "请从本次法律译文中提炼重要法律术语及有效译法，整理成可复用的双语术语表，并总结 3 条值得沿用的法律翻译技巧。源文本：[xxxxx]；译文：[xxxxx]", "slots": ["source", "target"], "format": "双语术语表：术语｜译法｜法域｜依据 + 3 条法律翻译技巧清单", "model": "DeepSeek V4 Pro", "version": "2.0", "note": "较之 GLM 5.2，DeepSeek V4 Pro 提炼的双语术语表释义更准确，能补充目标法域的等效译法，且总结的法律翻译技巧更具操作性。"}]</script>
+<script id="meta-data" type="application/json">[{"id": "meta1", "label": "Meta Prompt 1", "role": "Prompt Generator", "intro": "你是专业Prompt Generator，专门为翻译项目（含法律翻译）生成高质量提示词。 输出要求：", "items": ["生成简洁、指令明确、无冗余的独立Prompt；", "区分基础/进阶/垂直专项版本，区分Pre / Production / Post-production阶段；", "每条Prompt任务单一，边界清晰；", "需输出中文和英文版本。"], "full": "Meta Prompt 1: Prompt Generator：你是专业Prompt Generator，专门为翻译项目（含法律翻译）生成高质量提示词。 输出要求：\n1. 生成简洁、指令明确、无冗余的独立Prompt；\n2. 区分基础/进阶/垂直专项版本，区分Pre / Production / Post-production阶段；\n3. 每条Prompt任务单一，边界清晰；\n4. 需输出中文和英文版本。", "inputLabel": "本次任务需求 / 想要生成的提示词描述", "inputPlaceholder": "例：为一份中英保密协议生成「术语一致性检查」的进阶版提示词，要求区分中国内地与香港法域。", "sectionLabel": "本次任务需求"}, {"id": "meta2", "label": "Meta Prompt 2", "role": "Prompt Optimiser", "intro": "你是专业Prompt Optimiser，负责优化翻译领域的提示词。 请对原始Prompt完成以下优化：", "items": ["精简冗余表述，消除模糊、歧义语句；", "强化任务边界，明确输出格式、约束、禁止事项；", "保留原有核心任务，不篡改原始意图；", "控制字符长度；", "输出：优化后简短说明改动要点。"], "full": "Meta Prompt 2: Prompt Optimiser：你是专业Prompt Optimiser，负责优化翻译领域的提示词。 请对原始Prompt完成以下优化：\n1. 精简冗余表述，消除模糊、歧义语句；\n2. 强化任务边界，明确输出格式、约束、禁止事项；\n3. 保留原有核心任务，不篡改原始意图；\n4. 控制字符长度；\n5. 输出：优化后简短说明改动要点。", "inputLabel": "待优化的原始 Prompt", "inputPlaceholder": "把需要优化的 Prompt 粘贴到这里，或点「用当前生成的 Prompt 填入」。", "sectionLabel": "原始 Prompt"}]</script>
+<script>
+(function(){
+'use strict';
+var BANK=JSON.parse(document.getElementById('bank-data').textContent);
+var META=JSON.parse(document.getElementById('meta-data').textContent);
+var SLOT_LABEL={source:'源文本',target:'译文',v1:'译文 1',v2:'译文 2',v3:'译文 3'};
+var STAGES=[
+ {key:'pre',name:'PRE-PRODUCTION',cn:'译前准备',desc:'源文本理解 / 术语识别 / 背景与法域调研'},
+ {key:'prod',name:'PRODUCTION',cn:'译中生产',desc:'译文生成 / 纠错 / 质量评估'},
+ {key:'post',name:'POST-PRODUCTION',cn:'译后交付',desc:'可读性评估 / 客户反馈 / 资产沉淀'}
+];
+var PH_RE=/\[x{3,}\]/g;
+var ENGINE_PRESETS={
+ openrouter:{label:'OpenRouter · 一个 Key 覆盖全部家族',base:'https://openrouter.ai/api/v1',
+  map:{chatgpt:'openai/gpt-5',claude:'anthropic/claude-sonnet-4.5',gemini:'google/gemini-2.5-pro',
+   grok:'x-ai/grok-4',perplexity:'perplexity/sonar',deepseek:'deepseek/deepseek-chat',
+   qwen:'qwen/qwen-plus',zhipu:'zai-org/glm-4.6',kimi:'moonshotai/kimi-k2',
+   minimax:'minimax/minimax-m2',doubao:'openai/gpt-5',hunyuan:'openai/gpt-5',
+   stepfun:'openai/gpt-5',custom:'openai/gpt-5'}},
+ siliconflow:{label:'硅基流动 SiliconFlow · 国内直连聚合',base:'https://api.siliconflow.cn/v1',
+  map:{chatgpt:'Qwen/Qwen3-8B',claude:'Qwen/Qwen3-8B',gemini:'Qwen/Qwen3-8B',
+   grok:'Qwen/Qwen3-8B',perplexity:'Qwen/Qwen3-8B',deepseek:'deepseek-ai/DeepSeek-V3',
+   qwen:'Qwen/Qwen3-8B',zhipu:'THUDM/glm-4-9b-chat',kimi:'moonshotai/Kimi-K2-Instruct',
+   minimax:'MiniMaxAI/MiniMax-M2',doubao:'Qwen/Qwen3-8B',hunyuan:'Qwen/Qwen3-8B',
+   stepfun:'Qwen/Qwen3-8B',custom:'Qwen/Qwen3-8B'}},
+ deepseek:{label:'DeepSeek 官方',base:'https://api.deepseek.com/v1',fallback:'deepseek-chat'},
+ qwen:{label:'阿里云百炼 / 通义千问',base:'https://dashscope.aliyuncs.com/compatible-mode/v1',fallback:'qwen-plus'},
+ zhipu:{label:'智谱 GLM',base:'https://open.bigmodel.cn/api/paas/v4',fallback:'glm-4-plus'},
+ moonshot:{label:'月之暗面 Kimi',base:'https://api.moonshot.cn/v1',fallback:'moonshot-v1-8k'},
+ minimax:{label:'MiniMax',base:'https://api.minimax.chat/v1',fallback:'MiniMax-M2'},
+ ark:{label:'火山方舟 / 豆包',base:'https://ark.cn-beijing.volces.com/api/v3',fallback:'doubao-pro-32k'},
+ openai:{label:'OpenAI 官方',base:'https://api.openai.com/v1',fallback:'gpt-4o'},
+ custom:{label:'自定义 / 本地网关（Ollama 等）',base:'http://127.0.0.1:11434/v1',fallback:'llama3'}
+};
+var DEFAULT_LINKS={
+ chatgpt:'https://chatgpt.com/?q={q}',
+ claude:'https://claude.ai/new?q={q}',
+ gemini:'https://gemini.google.com/app',
+ grok:'https://grok.com/?q={q}',
+ perplexity:'https://www.perplexity.ai/search?q={q}',
+ deepseek:'https://chat.deepseek.com/',
+ qwen:'https://chat.qwen.ai/',
+ zhipu:'https://chat.z.ai/',
+ kimi:'https://www.kimi.com/',
+ minimax:'https://hailuoai.com/',
+ doubao:'https://www.doubao.com/chat/',
+ hunyuan:'https://hunyuan.tencent.com/',
+ stepfun:'https://www.stepfun.com/',
+ custom:'https://chatgpt.com/'
+};
+var DEFAULT_MAP={
+ chatgpt:'gpt-4o', claude:'claude-sonnet-4-5', gemini:'gemini-2.5-pro', grok:'grok-4',
+ perplexity:'sonar', deepseek:'deepseek-chat', qwen:'qwen-plus', zhipu:'glm-4-plus',
+ kimi:'moonshot-v1-8k', minimax:'MiniMax-Text-01', doubao:'doubao-pro-32k',
+ hunyuan:'hunyuan-turbo', stepfun:'step-2-16k', custom:'gpt-4o'
+};
+var PLAT_LABEL={chatgpt:'CHATGPT',claude:'CLAUDE',gemini:'GEMINI',grok:'GROK',perplexity:'PERPLEXITY',
+ deepseek:'DEEPSEEK',qwen:'QWEN / 通义',zhipu:'ZHIPU / 智谱',kimi:'KIMI',minimax:'MINIMAX / 海螺',
+ doubao:'DOUBAO / 豆包',hunyuan:'HUNYUAN / 混元',stepfun:'STEP / 阶跃',custom:'CUSTOM'};
+var FAMILY_RULES=[
+ [/qwen/i,'qwen'],[/claude/i,'claude'],[/gpt|terra|luna|sol|terra|o[134]/i,'chatgpt'],
+ [/deepseek/i,'deepseek'],[/glm|zhipu/i,'zhipu'],[/kimi/i,'kimi'],
+ [/minimax|hailuo|\bm2|\bm3/i,'minimax'],[/grok/i,'grok'],[/seed|doubao/i,'doubao'],
+ [/hy3|hunyuan|混元/i,'hunyuan'],[/step/i,'stepfun'],[/gemini/i,'gemini'],
+ [/muse|wonder|vierra/i,'custom']
+];
+var state={
+ stage:'all',lang:'all',q:'',appendFormat:true,prefill:true,remember:false,
+ inputs:{source:'',target:'',v1:'',v2:'',v3:'',lang:'',extra:''},
+ models:{}, links:JSON.parse(JSON.stringify(DEFAULT_LINKS)), modelMap:JSON.parse(JSON.stringify(DEFAULT_MAP)),
+ api:{base:'',key:'',override:'',conc:2},
+ engine:{mode:'auto',provider:'openrouter',localUrl:'',local:null,syncMap:true},
+ current:null, batch:null
+};
+var LS='promptbank_auge_v2';
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+ .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function $(id){return document.getElementById(id);}
+function toast(msg){var t=$('toast');t.textContent=msg;t.classList.add('on');
+ clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('on');},2200);}
+function save(){try{localStorage.setItem(LS,JSON.stringify({inputs:state.inputs,models:state.models,
+ links:state.links,modelMap:state.modelMap,appendFormat:state.appendFormat,prefill:state.prefill,
+ remember:state.remember,api:state.remember?state.api:{base:'',key:'',override:'',conc:2},
+ engine:{mode:state.engine.mode,provider:state.engine.provider,localUrl:state.engine.localUrl}}));}catch(e){}}
+function load(){try{var d=JSON.parse(localStorage.getItem(LS)||'null');if(!d)return;
+ if(d.inputs)Object.keys(state.inputs).forEach(function(k){if(d.inputs[k]!=null)state.inputs[k]=d.inputs[k];});
+ if(d.models)state.models=d.models;
+ if(d.links)Object.keys(DEFAULT_LINKS).forEach(function(k){if(d.links[k]!=null)state.links[k]=d.links[k];});
+ if(d.modelMap)Object.keys(DEFAULT_MAP).forEach(function(k){if(d.modelMap[k]!=null)state.modelMap[k]=d.modelMap[k];});
+ if(typeof d.appendFormat==='boolean')state.appendFormat=d.appendFormat;
+ if(typeof d.prefill==='boolean')state.prefill=d.prefill;
+ if(typeof d.remember==='boolean')state.remember=d.remember;
+ if(d.api)state.api=d.api;
+ if(d.engine){state.engine.mode=d.engine.mode||'auto';state.engine.provider=d.engine.provider||'openrouter';
+  state.engine.localUrl=d.engine.localUrl||'';}}catch(e){}}
+
+/* ---------- embedded engine ---------- */
+function engineUrl(){
+ var q=new URLSearchParams(location.search).get('engine');
+ if(q)return q.replace(/\/+$/,'');
+ if(state.engine.localUrl)return state.engine.localUrl.replace(/\/+$/,'');
+ return 'http://127.0.0.1:8765';}
+function engineMode(){var m=state.engine.mode;
+ if(m==='local'||m==='direct'||m==='off')return m;
+ if(state.engine.local&&state.engine.local.ok)return 'local';
+ if(state.api.base&&state.api.key)return 'direct';
+ return 'off';}
+function engineReady(){var m=engineMode();
+ if(m==='local')return !!(state.engine.local&&state.engine.local.ok&&(state.engine.local.configured||state.engine.local.demo));
+ if(m==='direct')return !!(state.api.base&&state.api.key);
+ return false;}
+function engineHint(){var m=engineMode(),l=state.engine.local;
+ if(l&&l.ok&&l.demo)return '演示模式：结果会显示在本页，但内容是示例；在「快速开始」填入 API Key 即切换为真实模型。';
+ if(m==='local'&&l&&l.ok&&!l.configured)return '本机引擎已连接，但还没填 API Key：请编辑 promptbank_keys.json';
+ if(m==='local')return '本机引擎未连接：请双击「启动 Prompt Bank.command」，已自动改为仅生成 Prompt';
+ if(m==='direct')return '请先在 CONFIG 面板填写 API Key，已自动改为仅生成 Prompt';
+ return '未启用内嵌运行引擎：已自动改为「一键生成全部完整 Prompt」；启动本机引擎后即可在页面内运行';}
+function applyPreset(key,quiet){
+ var p=ENGINE_PRESETS[key];if(!p)return;
+ state.engine.provider=key;state.api.base=p.base;
+ Object.keys(DEFAULT_MAP).forEach(function(k){
+  state.modelMap[k]=p.map?(p.map[k]||p.map.custom||p.fallback):p.fallback;});
+ syncCfg();renderCfgTables();save();render();
+ if(!quiet)toast('已应用 '+p.label+'：端点与 54 条模型映射已更新');}
+function applyServerMaps(maps){
+ var pk=(state.engine.local&&state.engine.local.provider)||state.engine.provider;
+ var map=maps[pk];
+ if(!map||!Object.keys(map).length){toast('引擎没有为该服务商返回模型映射，可点上方预设下拉手动应用');return;}
+ Object.keys(DEFAULT_MAP).forEach(function(k){if(map[k])state.modelMap[k]=map[k];});
+ save();renderCfgTables();render();toast('已同步 '+Object.keys(map).length+' 条真实模型 ID');}
+async function probeEngine(){
+ try{
+  var ctl=new AbortController();var tm=setTimeout(function(){ctl.abort();},1600);
+  var r=await fetch(engineUrl()+'/api/health',{signal:ctl.signal,cache:'no-store'});clearTimeout(tm);
+  var d=await r.json();
+  state.engine.local={ok:!!d.ok,configured:!!d.configured,demo:!!d.demo,provider:d.default_provider||'',
+   apply:d.apply_url||'',maps:d.model_maps||{},global:d.global_model||''};
+  if(d.ok&&d.model_maps&&state.engine.syncMap&&!probeEngine._synced){
+   var mp=d.model_maps[d.default_provider]||{};
+   if(Object.keys(mp).length){
+    Object.keys(DEFAULT_MAP).forEach(function(k){if(mp[k])state.modelMap[k]=mp[k];});
+    probeEngine._synced=true;renderCfgTables();render();}}
+ }catch(e){state.engine.local=null;}
+ updateEngineUI();}
+function updateEngineUI(){
+ var m=engineMode(),l=state.engine.local,ready=engineReady();
+ var dot=$('engDot'),msg=$('engMsg');if(!dot||!msg)return;
+ dot.className='eng-dot '+((l&&l.ok&&l.demo)?'warn':(ready?'on':(l&&l.ok?'warn':'err')));
+ if(m==='local')msg.innerHTML=(l&&l.ok)
+  ?(l.configured?'本机引擎已连接 · <b>'+esc(l.provider||'')+'</b> · 生成结果直接显示在本页':'本机引擎已连接 · <b>演示模式</b>：可直接在页面内试用，填 Key 后变真实模型')
+  :'本机引擎未连接 · 双击「启动 Prompt Bank.command」后点 TEST 重试';
+ else if(m==='direct')msg.innerHTML=ready?'浏览器直连 API · <b>'+esc(state.api.base)+'</b> · 结果直接显示在本页':'浏览器直连模式 · 请在 CONFIG 填写 API Key';
+ else if(m==='off')msg.innerHTML='内嵌运行已关闭 · 当前仅生成完整 Prompt';
+ else msg.innerHTML=(l&&l.ok&&l.configured)?'已自动接入本机引擎 · <b>可在页面内运行</b>':'未检测到运行引擎 · 可启动本机引擎，或在设置里选「浏览器直连 API」';
+ $('engModeLabel').textContent='MODE: '+m.toUpperCase()+(ready?' · READY':' · NOT READY');
+ $('engModes').querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.mode===state.engine.mode);});
+ $('engProvider').value=state.engine.provider;$('engLocalUrl').value=engineUrl();
+ if(updateEngineUI._last!==ready){updateEngineUI._last=ready;render();}
+ updateQuickUI();}
+async function testEngine(){
+ var box=$('engLog');box.className='eng-log';box.textContent='正在测试连接…';
+ var m=engineMode();
+ if(m==='off'||!engineReady()){box.className='eng-log bad';
+  box.textContent='当前未就绪。'+engineHint()+'\n状态：'+m.toUpperCase();return;}
+ try{
+  if(m==='local'){
+   var r=await fetch(engineUrl()+'/api/test',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({prompt:'ping',model:'',family:'custom'})});
+   var d=await r.json();if(!d.ok)throw new Error(d.error||'引擎返回失败');
+   box.className='eng-log ok';
+   box.textContent=(d.demo?'✓ 链路正常 · 当前为演示模式（填 Key 后即为真实模型）':'✓ 连接成功 · 模型已内嵌')+'\n服务商：'+d.provider+'\n实际模型：'+d.model+'\n耗时：'+d.elapsed_ms+' ms\n返回：'+String(d.content).slice(0,120);
+  }else{
+   var t0=Date.now(),out=await callApi('Reply with exactly: OK',state.api.override||state.modelMap.custom,{id:'test',model:''});
+   box.className='eng-log ok';
+   box.textContent='✓ 连接成功\n端点：'+state.api.base+'\n耗时：'+(Date.now()-t0)+' ms\n返回：'+String(out).slice(0,120);}
+  toast('连接测试通过');
+ }catch(e){box.className='eng-log bad';
+  box.textContent='✕ 测试失败：'+friendlyErr(e.message)+
+   '\n\n若为 402 余额不足：充值后直接再点一次「测试连接」即可，无需重新填 Key 或重启引擎。'+
+   '\n其他常见原因：Key 无效 / 模型 ID 不存在 / 端点不允许浏览器跨域（CORS）。走本机引擎则不受 CORS 影响。';
+  toast('连接测试失败');}}
+
+/* ---------- QUICK START ---------- */
+var QS_APPLY={openrouter:'https://openrouter.ai/keys',siliconflow:'https://cloud.siliconflow.cn/account/ak'};
+function updateQuickUI(){
+ var st=$('qsState'),tip=$('qsTip'),l=state.engine.local;
+ if(!st||!tip)return;
+ if(!l||!l.ok){
+  st.textContent='● 引擎未启动';st.style.color='#a33';
+  tip.textContent='只做一件事：双击同文件夹里的「启动 Prompt Bank.command」，浏览器会自动打开页面；那个黑窗口保持开着就行。启动后点右边的「重试连接」。';
+ }else if(l.configured){
+  st.textContent='● 已连接真实模型';st.style.color='#186b3b';
+  tip.textContent='已连接 '+esc(l.provider||'')+'。现在往下填源文本，点黄色「RUN ALL」，模型生成的结果会直接出现在本页，不用跳转。';
+ }else{
+  st.textContent='● 演示模式（可直接试用）';st.style.color='#9a7600';
+  tip.textContent='不用填任何东西也能用：点「先试一下」或 RUN ALL，结果会显示在本页，只是内容是示例。想要真实结果，就在上面粘一个 API Key 再点「保存并连接」。';
+ }
+}
+async function qsSaveKey(){
+ var key=(($('qsKey')||{}).value||'').trim(),pk=$('qsProvider').value;
+ if(pk==='more'){openEngine();return;}
+ if(!key){toast('请先粘贴 API Key；没有 Key 就点「先试一下」');$('qsKey').focus();return;}
+ var btn=$('qsSave');btn.disabled=true;btn.textContent='正在保存…';
+ var out=$('qsOut');out.style.display='block';out.textContent='正在保存并连接…';
+ try{
+  var r=await fetch(engineUrl()+'/api/setup',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({provider:pk,key:key})});
+  var d=await r.json();if(!d.ok)throw new Error(d.error||'保存失败');
+  applyPreset(pk,true);$('qsKey').value='';
+  await probeEngine();updateQuickUI();
+  out.textContent='✓ 已保存并连接。\n\n现在往下填源文本 → 点黄色 RUN ALL，模型结果就会直接出现在本页。\nKey 只写进本机的 promptbank_keys.json，不会进浏览器。';
+  toast('已连接真实模型');
+ }catch(e){
+  out.textContent='✕ 没能保存：'+e.message+'\n\n如果你是直接双击 HTML 打开的，请先双击「启动 Prompt Bank.command」，再用浏览器打开 http://127.0.0.1:8765/';
+  toast('保存失败');
+ }finally{btn.disabled=false;btn.textContent='保存并连接 →';}
+}
+async function qsTryDemo(){
+ var out=$('qsOut');out.style.display='block';out.textContent='正在生成完整 Prompt 并在页面内运行…';
+ try{
+  if(!(state.inputs.source||'').trim())loadSample();
+  var item=BANK[0],r=build(item),res;
+  if(engineReady()&&engineMode()==='local'){
+   res=await callApi(r.text,apiModelFor(item),item);
+  }else{
+   res='【页面内演示 · 尚未连接引擎】\n这一格就是模型结果将来出现的位置。\n\n'+
+    '本条组装好的完整 Prompt（共 '+r.text.length+' 字）开头：\n────────────────\n'+
+    r.text.slice(0,400)+(r.text.length>400?'…':'')+'\n────────────────\n\n'+
+    '想看到真实模型输出：双击「启动 Prompt Bank.command」，浏览器自动打开页面后，在上面粘一个 API Key 点「保存并连接」即可。';
+  }
+  out.textContent=res;toast('结果已显示在本页');
+ }catch(e){out.textContent='运行失败：'+e.message+'\n\n'+engineHint();toast('运行失败');}
+}
+
+function initEngine(){
+ $('engModes').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  state.engine.mode=b.dataset.mode;save();updateEngineUI();toast('运行模式：'+b.textContent.trim());});
+ $('engProvider').addEventListener('change',function(){applyPreset(this.value);});
+ $('engLocalUrl').addEventListener('change',function(){state.engine.localUrl=this.value.trim();save();probeEngine();});
+ $('engTestConn').addEventListener('click',testEngine);
+ $('engTestBtn').addEventListener('click',function(){probeEngine().then(testEngine);});
+ $('engApplyMap').addEventListener('click',function(){
+  if(state.engine.local&&state.engine.local.maps)applyServerMaps(state.engine.local.maps);
+  else toast('本机引擎未连接');});
+ $('engSetupBtn').addEventListener('click',openEngine);
+ $('qsSave').addEventListener('click',qsSaveKey);
+ $('qsDemo').addEventListener('click',qsTryDemo);
+ $('qsRetry').addEventListener('click',function(){probeEngine().then(function(){updateQuickUI();toast(state.engine.local&&state.engine.local.ok?'已重新检测':'仍未检测到引擎，请先双击启动文件');});});
+ $('qsProvider').addEventListener('change',function(){var u=QS_APPLY[this.value];$('qsApply').href=u||'https://openrouter.ai/keys';
+  if(this.value==='more'){openEngine();}});
+ $('qsKey').addEventListener('keydown',function(e){if(e.key==='Enter')qsSaveKey();});
+ updateQuickUI();updateEngineUI();probeEngine();
+ setInterval(function(){if(!engineReady())probeEngine();},15000);}
+/* ---------- platform / model resolution ---------- */
+function familyOf(modelName){
+ for(var i=0;i<FAMILY_RULES.length;i++){if(FAMILY_RULES[i][0].test(modelName||''))return FAMILY_RULES[i][1];}
+ return 'custom';
+}
+function platformOf(item){return familyOf(modelOf(item).model);}
+function apiModelFor(item){
+ if(state.api.override&&state.api.override.trim())return state.api.override.trim();
+ var f=platformOf(item);
+ return (state.modelMap[f]||'').trim()||modelOf(item).model;
+}
+function linkFor(item,text){
+ var f=platformOf(item),tpl=state.links[f]||DEFAULT_LINKS[f]||DEFAULT_LINKS.custom;
+ var enc=encodeURIComponent(text||'');
+ var tooLong=enc.length>1800;   // 中文编码后膨胀数倍，按编码长度判断
+ if(!state.prefill||tooLong||tpl.indexOf('{q}')===-1){
+   return {url:tpl.replace(/[?&]q=\{q\}/,'').replace(/[?&]$/,''),prefilled:false,key:f};
+ }
+ return {url:tpl.replace('{q}',enc),prefilled:true,key:f};
+}
+function modelOf(item){var o=state.models[item.id];
+ return {model:(o&&o.model)||item.model,version:(o&&o.version)||item.version};}
+
+/* ---------- prompt assembly ---------- */
+function getInput(key){var i=state.inputs;
+ if(key==='v1'||key==='v2'||key==='v3')return (i[key]||'').trim()||(i.target||'').trim();
+ if(key==='target')return (i.target||'').trim()||(i.v1||'').trim();
+ return (i.source||'').trim();}
+function contextBlock(lang){var i=state.inputs,p=[],en=lang==='EN';
+ if((i.source||'').trim())p.push((en?'Source text:\n':'源文本：\n')+i.source.trim());
+ if((i.target||'').trim())p.push((en?'Translation:\n':'译文：\n')+i.target.trim());
+ ['v1','v2','v3'].forEach(function(k,n){if((i[k]||'').trim())
+   p.push((en?'Translation version '+(n+1)+':\n':'译文'+(n+1)+'：\n')+i[k].trim());});
+ if((i.lang||'').trim())p.push((en?'Target language / jurisdiction: ':'目标语言 / 法域：')+i.lang.trim());
+ if((i.extra||'').trim())p.push((en?'Additional requirements: ':'附加要求：')+i.extra.trim());
+ return p.join('\n\n');}
+function build(item){var idx=0,missing=[],en=item.lang==='EN';
+ var text=item.prompt.replace(PH_RE,function(){var key=item.slots[idx++]||'source';
+   var v=getInput(key);if(!v)missing.push(SLOT_LABEL[key]||key);
+   return v||('〔'+(SLOT_LABEL[key]||key)+'〕');});
+ if(!item.slots.length){
+   var ctx=contextBlock(item.lang);
+   if(ctx)text+='\n\n'+(en?'--- Input text ---':'--- 输入文本 ---')+'\n'+ctx;
+   if(!(state.inputs.source||'').trim())missing.push('源文本');
+ }else{
+   var opt=[];
+   if((state.inputs.lang||'').trim())opt.push((en?'Target language / jurisdiction: ':'目标语言 / 法域：')+state.inputs.lang.trim());
+   if((state.inputs.extra||'').trim())opt.push((en?'Additional requirements: ':'附加要求：')+state.inputs.extra.trim());
+   if(opt.length)text+='\n\n'+opt.join('\n');
+ }
+ if(state.appendFormat&&item.format)text+='\n\n'+(en?'Output format requirement: ':'【输出格式要求】')+item.format;
+ return {text:text,missing:missing};}
+function buildMeta(m,input){return m.full+'\n\n【'+m.sectionLabel+'】\n'+(input||'').trim();}
+
+/* ---------- rendering ---------- */
+function tplHtml(item){var idx=0;
+ return esc(item.prompt).replace(/\[x{3,}\]/g,function(){var k=item.slots[idx++]||'source';
+   return '<span class="ph" title="将用工作台中的'+esc(SLOT_LABEL[k]||k)+'替换">〈'+esc(SLOT_LABEL[k]||k)+'〉</span>';});}
+function slotSummary(item){if(!item.slots.length)return '<b>承接上一步</b> · 无占位符，自动附上工作台输入作为上下文';
+ var seen=[],l=[];item.slots.forEach(function(k){if(seen.indexOf(k)===-1){seen.push(k);l.push(esc(SLOT_LABEL[k]||k));}});
+ return '占位符映射：<b>'+l.join(' · ')+'</b>';}
+function cardHtml(item){var mv=modelOf(item),f=familyOf(mv.model),api=apiModelFor(item);
+ return '<article class="pcard" data-id="'+esc(item.id)+'" data-stage="'+esc(item.stage)+'" data-lang="'+item.lang.toLowerCase()+'" data-no="'+esc(item.no)+'">'+
+  '<div class="pc-head"><div class="pc-left"><span class="pno">'+esc(item.no)+'</span>'+
+   '<span class="lang-tag '+item.lang.toLowerCase()+'">'+item.lang+'</span>'+
+   '<span class="pc-family">'+esc(PLAT_LABEL[f]||f)+'</span>'+
+    (engineReady()?'<span class="pc-engine">EMBED READY</span>':'')+'</div>'+
+   '<button class="model-chip" type="button" data-act="model" title="点击修改测试模型与版本">'+
+    '<b>'+esc(mv.model)+'</b><span class="ver">v'+esc(mv.version)+'</span>'+
+    '<span class="api-to">→ '+esc(api)+' ↗</span></button></div>'+
+  '<div class="pc-body"><h4 class="pc-scene">'+esc(item.scene)+'</h4>'+
+   '<div class="pc-tpl">'+tplHtml(item)+'</div>'+
+   (item.format?'<div class="pc-format"><b>输出格式</b>'+esc(item.format)+'</div>':'')+
+   '<div class="pc-slots">'+slotSummary(item)+'</div>'+
+   '<p class="pc-note" title="点击展开完整备注">备注 · '+esc(item.note||'—')+'</p></div>'+
+  '<div class="pc-acts">'+
+   '<button class="primary" type="button" data-act="build">生成完整 PROMPT</button>'+
+   '<button type="button" data-act="open">复制并跳转 ↗</button>'+
+   '<button type="button" class="embed-run" data-act="run">'+
+    (engineReady()?'▶ 页面内运行':'▶ 运行 / 需引擎')+'</button></div></article>';}
+function visibleItems(){var q=state.q.toLowerCase();return BANK.filter(function(it){
+ if(state.stage!=='all'&&it.stage!==state.stage)return false;
+ if((state.lang==='en'||state.lang==='cn')&&it.lang.toLowerCase()!==state.lang)return false;
+ if(q){var h=(it.no+' '+it.scene+' '+it.prompt+' '+it.model+' '+it.version+' '+it.format+' '+it.note).toLowerCase();
+  if(h.indexOf(q)===-1)return false;}return true;});}
+function render(){var items=visibleItems(),html='';
+ $('hitCount').textContent=state.q?(items.length+' MATCH'):'';
+ $('indexCount').textContent=items.length+' ENTRIES';
+ if(state.lang==='compare'){
+  STAGES.forEach(function(s){if(state.stage!=='all'&&state.stage!==s.key)return;
+   var pairs={};items.filter(function(i){return i.stage===s.key;}).forEach(function(i){(pairs[i.no]=pairs[i.no]||{})[i.lang.toLowerCase()]=i;});
+   var nos=Object.keys(pairs).sort();if(!nos.length)return;
+   html+='<section class="stage" id="stage-'+s.key+'"><div class="block-head" style="border-top:0;padding-top:22px">'+
+    '<span class="idx caps">'+esc(s.key.toUpperCase())+'</span><h2 style="font-size:25px">'+s.name+' <span style="font-size:13px;font-weight:500;color:#6c6c62">'+s.cn+'</span></h2>'+
+    '<span class="side caps">'+s.desc+'</span></div><div class="compare-wrap">';
+   nos.forEach(function(no){
+    html+='<div class="compare-tag">SCENARIO '+esc(no)+' · EN / CN</div>'+
+      '<div class="compare-row">'+(pairs[no].en?cardHtml(pairs[no].en):'')+
+      (pairs[no].cn?cardHtml(pairs[no].cn):'')+'</div>';});
+   html+='</div></section>';});
+ }else{
+  STAGES.forEach(function(s){if(state.stage!=='all'&&state.stage!==s.key)return;
+   var list=items.filter(function(i){return i.stage===s.key;});if(!list.length)return;
+   html+='<section class="stage" id="stage-'+s.key+'"><div class="block-head" style="border-top:0;padding-top:22px">'+
+    '<span class="idx caps">'+esc(s.key.toUpperCase())+'</span><h2 style="font-size:25px">'+s.name+' <span style="font-size:13px;font-weight:500;color:#6c6c62">'+s.cn+'</span></h2>'+
+    '<span class="side caps">'+s.desc+'</span></div><div class="cards-grid">'+list.map(cardHtml).join('')+'</div></section>';});}
+ if(!html)html='<div class="req">没有匹配的提示词，试试清空搜索或切换筛选。</div>';
+ $('cardArea').innerHTML=html;}
+function metaHtml(m){return '<article class="meta-card" data-meta="'+esc(m.id)+'">'+
+ '<div class="meta-head"><span class="hl caps" style="font-size:9px">'+esc(m.label)+'</span><span class="meta-role">'+esc(m.role)+'</span></div>'+
+ '<p class="meta-intro">'+esc(m.intro)+'</p><ol class="meta-list">'+m.items.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ol>'+
+ '<label class="caps" style="display:block;margin:14px 0 7px">'+esc(m.inputLabel)+'</label>'+
+ '<textarea class="meta-input" placeholder="'+esc(m.inputPlaceholder)+'"></textarea>'+
+ '<div class="wb-sub">'+
+  '<button class="btn btn-y sm" type="button" data-mact="build">生成完整元 PROMPT</button>'+
+  (m.id==='meta2'?'<button class="btn sm" type="button" data-mact="fill">用当前 PROMPT 填入</button>':'')+
+  '<button class="btn sm" type="button" data-mact="copy">复制原文</button>'+
+  '<button class="btn sm" type="button" data-mact="open">复制并跳转 ↗</button></div></article>';}
+function renderMeta(){$('metaArea').innerHTML=META.map(metaHtml).join('');}
+
+/* ---------- config tables ---------- */
+function renderCfgTables(){
+ $('mapTable').querySelector('tbody').innerHTML=Object.keys(DEFAULT_MAP).map(function(k){
+  return '<tr><td>'+esc(PLAT_LABEL[k]||k)+'</td><td><input type="text" data-map="'+esc(k)+'" value="'+esc(state.modelMap[k])+'"></td></tr>';}).join('');
+ $('linkTable').querySelector('tbody').innerHTML=Object.keys(DEFAULT_LINKS).map(function(k){
+  return '<tr><td>'+esc(PLAT_LABEL[k]||k)+'</td><td><input type="text" data-link="'+esc(k)+'" value="'+esc(state.links[k])+'"></td></tr>';}).join('');
+ if(!renderCfgTables._b){renderCfgTables._b=1;
+  $('mapTable').addEventListener('input',function(e){var k=e.target.dataset.map;if(k){state.modelMap[k]=e.target.value;save();render();}});
+  $('linkTable').addEventListener('input',function(e){var k=e.target.dataset.link;if(k){state.links[k]=e.target.value;save();}});}
+}
+function syncCfg(){
+ $('cfgPrefill').checked=state.prefill;$('cfgRemember').checked=state.remember;$('cfgAppend').checked=state.appendFormat;
+ $('appendBtn').textContent=state.appendFormat?'✓ 附加输出格式':'○ 不附加输出格式';
+ $('apiBase').value=state.api.base||'';$('apiKey').value=state.api.key||'';
+ $('apiModelOverride').value=state.api.override||'';$('apiConc').value=state.api.conc||2;
+ if($('engProvider'))$('engProvider').value=state.engine.provider;
+ if($('engLocalUrl'))$('engLocalUrl').value=engineUrl();
+ var map={source:'inSource',target:'inTarget',v1:'inV1',v2:'inV2',v3:'inV3',lang:'inLang',extra:'inExtra'};
+ Object.keys(map).forEach(function(k){var el=$(map[k]);if(el)el.value=state.inputs[k]||'';});
+}
+function bindCfg(){
+ var map={source:'inSource',target:'inTarget',v1:'inV1',v2:'inV2',v3:'inV3',lang:'inLang',extra:'inExtra'};
+ Object.keys(map).forEach(function(k){$(map[k]).addEventListener('input',function(){state.inputs[k]=this.value;save();});});
+ [['apiBase','base'],['apiKey','key'],['apiModelOverride','override']].forEach(function(p){
+  $(p[0]).addEventListener('input',function(){state.api[p[1]]=this.value;save();});});
+ $('apiConc').addEventListener('change',function(){state.api.conc=Math.max(1,Math.min(6,parseInt(this.value,10)||2));this.value=state.api.conc;save();});
+ $('cfgPrefill').addEventListener('change',function(){state.prefill=this.checked;save();});
+ $('cfgRemember').addEventListener('change',function(){state.remember=this.checked;save();});
+ $('cfgAppend').addEventListener('change',function(){state.appendFormat=this.checked;syncCfg();save();render();});
+}
+
+/* ---------- copy / open ---------- */
+function copyText(txt,msg){var done=function(){toast(msg||'已复制到剪贴板');};
+ if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(done,function(){fallbackCopy(txt,done);});}
+ else fallbackCopy(txt,done);}
+function fallbackCopy(txt,cb){var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+ document.body.appendChild(ta);ta.select();try{document.execCommand('copy');if(cb)cb();}catch(e){}
+ document.body.removeChild(ta);}
+function copyAndOpen(item,text,fromClick){
+ var L=linkFor(item,text);
+ fallbackCopy(text);
+ toast('已复制完整 Prompt · 正在打开 '+(PLAT_LABEL[L.key]||L.key)+(L.prefilled?'（预填）':'（请粘贴）'));
+ if(fromClick!==false){
+  var w=window.open(L.url,'_blank','noopener,noreferrer');
+  if(!w)toast('弹窗被拦截：Prompt 已复制，请手动打开 '+(PLAT_LABEL[L.key]||L.key));
+ }
+ return L;
+}
+function openPlatformByKey(key,text){
+ var tpl=state.links[key]||DEFAULT_LINKS[key]||DEFAULT_LINKS.custom;
+ var enc=encodeURIComponent(text||'');
+ var tooLong=enc.length>1800;
+ var url=(state.prefill&&!tooLong&&tpl.indexOf('{q}')!==-1)?tpl.replace('{q}',enc):tpl.replace(/[?&]q=\{q\}/,'').replace(/[?&]$/,'');
+ fallbackCopy(text);
+ var w=window.open(url,'_blank','noopener,noreferrer');
+ toast('已复制 · 打开 '+(PLAT_LABEL[key]||key)+(w?'':'（弹窗被拦截，请手动打开）'));
+}
+
+/* ---------- drawer ---------- */
+function openDrawer(cfg){state.current=cfg;
+ $('dwTitle').textContent=cfg.title;$('dwSub').textContent=cfg.sub;
+ $('dwModel').value=cfg.model||'';$('dwVer').value=cfg.version||'';
+ $('dwModel').disabled=false;$('dwVer').disabled=!cfg.item;
+ $('dwPrompt').value=cfg.text||'';setWarn(cfg.missing||[]);
+ $('dwResultBox').style.display='none';
+ renderDrawerLinks(cfg);
+ $('drawer').classList.add('on');$('drawerMask').classList.add('on');}
+function renderDrawerLinks(cfg){
+ var f=cfg.item?platformOf(cfg.item):'custom';
+ var keys=[f,'chatgpt','claude','deepseek','qwen'];
+ var seen={},list=[];
+ keys.forEach(function(k){if(!seen[k]&&DEFAULT_LINKS[k]){seen[k]=1;list.push(k);}});
+ $('dwLinks').innerHTML=list.map(function(k){
+  return '<button type="button" data-plat="'+esc(k)+'">'+esc(PLAT_LABEL[k]||k)+' ↗</button>';}).join('');
+ $('dwLinks').onclick=function(e){var b=e.target.closest('[data-plat]');if(!b)return;
+  openPlatformByKey(b.dataset.plat,$('dwPrompt').value);};
+ updateApiModelLine(cfg);}
+function updateApiModelLine(cfg){
+ var el=$('dwApiModel');
+ if(cfg.item){var f=platformOf(cfg.item);
+  el.innerHTML='内嵌调用模型 <b>'+esc(apiModelFor(cfg.item))+'</b> · 家族 '+esc(PLAT_LABEL[f]||f)+
+   ' · 引擎 '+esc(engineMode().toUpperCase())+(engineReady()?' · <b>已就绪</b>':' · 未就绪，点运行会提示启用');}
+ else el.innerHTML='元提示词运行：模型取 CONFIG 中的「全局模型覆盖」或 '+esc(PLAT_LABEL.custom)+' 映射';}
+function setWarn(missing){var w=$('dwWarn');
+ if(missing&&missing.length){w.style.display='block';
+  w.innerHTML='⚠ 以下输入还没填：'+esc(missing.join('、'))+'。已用〈占位标记〉保留，可到工作台补齐后点「重新生成」，也可直接手工补写。';}
+ else w.style.display='none';}
+function closeDrawer(){$('drawer').classList.remove('on');$('drawerMask').classList.remove('on');}
+function saveModel(){if(!state.current||!state.current.item)return;
+ var it=state.current.item;state.models[it.id]={model:$('dwModel').value.trim()||it.model,
+  version:$('dwVer').value.trim()||it.version};save();render();updateApiModelLine(state.current);
+ toast('已更新该条的测试模型与版本');}
+function rebuild(){if(!state.current)return;var c=state.current;
+ if(c.item){var r=build(c.item);$('dwPrompt').value=r.text;setWarn(r.missing);}
+ else if(c.meta){var ta=c.card.querySelector('.meta-input');$('dwPrompt').value=buildMeta(c.meta,ta?ta.value:'');}
+ updateApiModelLine(c);}
+async function callApi(promptText,model,item){
+ var m=engineMode();
+ if(m==='local'){
+  var family=item?platformOf(item):'custom';
+  var res=await fetch(engineUrl()+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({prompt:promptText,model:model,family:family,temperature:0.3,max_tokens:2048})});
+  var d=await res.json();
+  if(!d.ok)throw new Error(d.error||'引擎返回失败');
+  callApi.last={provider:d.provider,model:d.model,ms:d.elapsed_ms,usage:d.usage||{}};
+  return d.content;}
+ if(m==='direct'){
+  var a=state.api,t0=Date.now();
+  var res=await fetch(a.base.replace(/\/+$/,'')+'/chat/completions',{method:'POST',
+   headers:{'Content-Type':'application/json','Authorization':'Bearer '+a.key},
+   body:JSON.stringify({model:model,messages:[{role:'user',content:promptText}],temperature:0.3,max_tokens:2048})});
+  var data=await res.json();
+  if(!res.ok)throw new Error((data.error&&data.error.message)||('HTTP '+res.status));
+  var out=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||JSON.stringify(data,null,2);
+  callApi.last={provider:'direct',model:model,ms:Date.now()-t0,usage:data.usage||{}};
+  return out;}
+ throw new Error('未启用内嵌运行引擎');}
+callApi.last=null;
+/* ---------- 错误翻译：把上游报错变成可执行的修复指引 ---------- */
+function friendlyErr(msg){
+ var s=String(msg||''),low=s.toLowerCase();
+ if(low.indexOf('402')>=0||low.indexOf('30001')>=0||low.indexOf('insufficient')>=0||low.indexOf('balance')>=0)
+  return '账户余额不足 / 欠费停服（上游 HTTP 402 · code 30001）。\n'+
+   '注意：API Key 是有效的，网页和 Prompt 也没有问题，是服务商在账户层面拒绝扣费（所有模型都会失败，换免费模型也绕不过）。\n'+
+   '处理：登录 SiliconFlow 控制台 → 完成实名认证 → 「账户余额」充值一小笔 → 回到本页点「重试失败项」。代金券需先有一次现金充值才会生效。\n'+
+   '控制台：https://cloud.siliconflow.cn/　｜　也可以在 CONFIG 里改填另一家有额度的服务商 Key。\n'+
+   '原始报错：'+s;
+ if(low.indexOf('401')>=0||low.indexOf('invalid api key')>=0||low.indexOf('incorrect api key')>=0)
+  return 'API Key 无效或已失效（401）。请到服务商控制台重新生成 Key，在「快速开始」或 CONFIG 里重新粘贴并保存。\n原始报错：'+s;
+ if(low.indexOf('429')>=0)
+  return '触发限流（429）：请求太密。请在 CONFIG 把并发数调到 1–2，稍后再点「重试失败项」。\n原始报错：'+s;
+ if(low.indexOf('404')>=0||(low.indexOf('model')>=0&&low.indexOf('exist')>=0))
+  return '模型 ID 不存在或该账户未开通（404）。请到服务商模型广场复制完整模型 ID，在 CONFIG 的映射表里更新。\n原始报错：'+s;
+ return s;}
+function isAccountFatal(msg){var s=String(msg||'').toLowerCase();
+ return s.indexOf('402')>=0||s.indexOf('30001')>=0||s.indexOf('insufficient')>=0||s.indexOf('401')>=0||s.indexOf('invalid api key')>=0;}
+function showBatchGuide(msg){
+ var n=$('batchNote');if(!n)return;
+ n.style.background='#fff3cd';n.style.borderLeft='6px solid #e3000f';n.style.padding='12px 14px';
+ n.innerHTML='<b style="color:#b00020">批量已停止 · 这是账户侧问题，不是网页故障</b><br>'+
+  esc(msg).replace(/\n/g,'<br>')+
+  '<br><b>修好后不用重新输入源文本</b>：先点 TRY 3 验证 3 条成功，再点右下角「重试失败项」只重跑失败条目，或直接 RUN ALL。';}
+async function runCurrent(){var c=state.current,text=$('dwPrompt').value.trim();
+ if(!text){toast('请先生成 Prompt');return;}
+ if(!engineReady()){openEngine();toast(engineHint());return;}
+ var model=$('dwModel').value.trim()||state.api.override||state.modelMap.custom;
+ var box=$('dwResultBox'),out=$('dwResult');box.style.display='block';
+ box.scrollIntoView({behavior:'smooth',block:'nearest'});
+ var t0=Date.now();out.textContent='正在请求 '+model+' … 已等待 0 秒';
+ var tick=setInterval(function(){out.textContent='正在请求 '+model+' … 已等待 '+Math.round((Date.now()-t0)/1000)+' 秒（模型响应较慢时请稍候）';},2000);
+ $('dwResultMeta').textContent='';
+ var btn=$('dwRun');btn.disabled=true;btn.textContent='运行中…';
+ try{
+  var res=await callApi(text,model,c.item);out.textContent=res;
+  var L=callApi.last||{};
+  $('dwResultMeta').textContent='引擎：'+(L.provider||'—')+' · 实际模型：'+(L.model||'—')+
+   ' · 耗时：'+(L.ms==null?'—':L.ms+' ms')+
+   (L.usage&&L.usage.total_tokens?' · tokens：'+L.usage.total_tokens:'');
+  toast('生成完成 · 结果已显示在本页');
+ }catch(e){out.textContent='请求失败：'+friendlyErr(e.message)+'\n\n'+engineHint();toast('运行失败');}
+ finally{clearInterval(tick);btn.disabled=false;btn.textContent='运行';}}
+function download(name,text){var blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+ var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+ document.body.appendChild(a);a.click();document.body.removeChild(a);
+ setTimeout(function(){URL.revokeObjectURL(a.href);},1500);}
+
+/* ---------- batch ---------- */
+function batchRowHtml(i){var b=state.batch,r=b.results[i],it=b.items[i],mv=modelOf(it);
+ var isApi=b.mode==='api';
+ var shown=isApi?(r.result||''):(r.output||'');
+ var waiting=isApi&&!shown&&r.status!=='error';
+ var secs=(r.status==='running'&&r.t0)?Math.round((Date.now()-r.t0)/1000):0;
+ var ph=waiting?(r.status==='running'?'⏳ 模型正在生成… 已等待 '+secs+' 秒':'○ 排队中，等待调用'):'';
+ var label=isApi?'模型输出':'完整 Prompt';
+ var stLabel={pending:'排队',running:'运行中',done:'完成',generated:'已生成',error:'失败'}[r.status]||r.status;
+ return '<div class="brow" id="br-'+i+'">'+
+  '<div class="brow-id">'+esc(it.no)+'<small>'+it.lang+' · '+esc(it.stage.toUpperCase())+'</small></div>'+
+  '<div class="brow-main"><div class="bt">'+esc(it.scene)+'</div>'+
+   '<div class="bmodel">'+esc(mv.model)+' v'+esc(mv.version)+' → '+esc(r.apiModel)+(r.ms?' · '+r.ms+'ms':'')+'</div>'+
+   '<div class="brow-out'+(r.status==='error'?' err':(waiting?' wait':''))+'">'+
+    '<span class="out-label">'+label+'</span>'+esc(shown||ph)+'</div></div>'+
+  '<div class="brow-side"><span class="status '+r.status+'">'+stLabel+'</span>'+
+   '<button class="btn sm" type="button" data-bact="copy" data-i="'+i+'">复制</button>'+
+   '<button class="btn sm" type="button" data-bact="open" data-i="'+i+'">跳转 ↗</button></div></div>';}
+function renderBatch(){var b=state.batch;
+ $('batchTitle').textContent=b.mode==='api'?'BATCH / API 批量运行':'BATCH / 已生成全部完整 PROMPT';
+ var n=$('batchNote');if(n)n.innerHTML=b.mode==='api'
+  ?'↓ 下面显示的是 <b>模型生成结果</b>：每条完成后自动填入，等待中的条目不会显示 Prompt。较慢时可先用上方筛选只跑几条，或在 CONFIG 调高并发数。'
+  :'↓ 下面显示的是 <b>组装好的完整 Prompt</b>（未调用模型），可逐条复制、跳转或导出。';
+ $('batchList').innerHTML=b.results.map(function(_,i){return batchRowHtml(i);}).join('');
+ updateBatchStat();}
+function updateBatchStat(){var b=state.batch;
+ var failed=b.results.filter(function(r){return r.status==='error';}).length;
+ $('batchStat').textContent=b.done+' / '+b.items.length+(b.mode==='api'?' · API':' · GENERATED')+(failed?' · 失败 '+failed:'');
+ $('batchBar').style.width=(b.items.length?b.done/b.items.length*100:0)+'%';}
+function updateBatchRow(i){var el=$('br-'+i);if(el)el.outerHTML=batchRowHtml(i);}
+async function runAll(mode,limit){
+ if(state.batch&&state.batch.running){toast('已有批量任务在运行');return;}
+ var items=visibleItems();if(limit&&limit>0)items=items.slice(0,limit);
+ if(!items.length){toast('当前筛选没有条目');return;}
+ var canApi=engineReady();
+ var useApi=(mode==='api'&&canApi);
+ if(mode==='api'&&!canApi){toast(engineHint());$('enginePanel').classList.add('open');}
+ var b={items:items,mode:useApi?'api':'generate',running:true,abort:false,done:0,
+  results:items.map(function(it){var r=build(it);return {status:'pending',output:r.output||r.text,
+   result:'',t0:0,apiModel:apiModelFor(it),ms:0,error:''};})};
+ state.batch=b;$('batchPanel').classList.add('open');renderBatch();
+ $('batchPanel').scrollIntoView({behavior:'smooth',block:'start'});
+ var idx=0,conc=useApi?Math.max(1,Math.min(6,parseInt(state.api.conc,10)||3)):6;
+ var tick=setInterval(function(){b.results.forEach(function(r,i){if(r.status==='running')updateBatchRow(i);});},3000);
+ async function worker(){while(true){
+  if(b.abort)return;var i=idx++;if(i>=items.length)return;
+  var r=b.results[i],it=items[i],t0=Date.now();r.status='running';r.t0=t0;updateBatchRow(i);
+  if(useApi){try{r.result=await callApi(r.output,apiModelFor(it),it);}
+   catch(e){r.status='error';r.result=friendlyErr(e.message);r.error=e.message;
+    if(isAccountFatal(e.message)){b.fatal=friendlyErr(e.message);b.abort=true;}}}
+  if(r.status!=='error')r.status=useApi?'done':'generated';
+  r.ms=Date.now()-t0;b.done++;updateBatchRow(i);updateBatchStat();}}
+ try{await Promise.all(Array.from({length:conc},worker));}catch(e){}
+ clearInterval(tick);b.running=false;
+ if(b.fatal)showBatchGuide(b.fatal);
+ var nf=b.results.filter(function(r){return r.status==='error';}).length;
+ $('batchStat').textContent=b.done+' / '+b.items.length+(b.abort?' · ABORTED':' · COMPLETE')+(nf?' · 失败 '+nf:'');
+ toast(b.fatal?'账户问题：已停止批量运行，请看顶部提示':(b.abort?'已中止':'完成 '+b.done+' / '+b.items.length+' 条'));
+}
+function batchExport(fmt){var b=state.batch;if(!b){toast('请先执行批量任务');return;}
+ if(fmt==='json'){download('promptbank_batch.json',JSON.stringify(b.items.map(function(it,i){
+  var mv=modelOf(it);return {no:it.no,lang:it.lang,stage:it.stage,scene:it.scene,model:mv.model,
+   version:mv.version,apiModel:b.results[i].apiModel,status:b.results[i].status,
+   prompt:b.results[i].output,result:b.results[i].result||''};}),null,2));return;}
+ var lines=['# Prompt Bank · 批量结果','','- 模式：'+(b.mode==='api'?'API 运行':'仅生成完整 Prompt'),
+  '- 条目：'+b.items.length,'- 时间：'+new Date().toLocaleString('zh-CN'),'','## 输入','',
+  '**源文本**：',(state.inputs.source||'（未填写）'),'','**译文**：',(state.inputs.target||'（未填写）'),''];
+ b.items.forEach(function(it,i){var mv=modelOf(it),r=b.results[i];
+  lines.push('## '+it.no+' ['+it.lang+'] '+it.scene,'',
+   '- 测试模型：'+mv.model+' / v'+mv.version,'- 调用模型：'+r.apiModel,
+   '- 状态：'+r.status+(r.ms?' · '+r.ms+'ms':''),'','### 完整 Prompt','','```text',r.output,'```','');
+  if(b.mode==='api')lines.push('### 模型输出','','```text',(r.result||'（未完成）'),'```','');});
+ download('promptbank_batch.md',lines.join('\n'));toast('已导出批量结果');}
+
+/* ---------- export all prompts ---------- */
+function exportMd(){var items=visibleItems(),lines=['# Assignment 1 Prompt Bank（导出）','',
+ '- 导出时间：'+new Date().toLocaleString('zh-CN'),'- 条目数：'+items.length,
+ '- 附加输出格式：'+(state.appendFormat?'是':'否'),'','## 当前输入','',
+ '**源文本**：',(state.inputs.source||'（未填写）'),'','**译文**：',(state.inputs.target||'（未填写）'),''];
+ STAGES.forEach(function(s){var list=items.filter(function(i){return i.stage===s.key;});if(!list.length)return;
+  lines.push('## '+s.name,'');
+  list.forEach(function(i){var mv=modelOf(i),r=build(i),L=linkFor(i,r.text);
+   lines.push('### '+i.no+' ['+i.lang+'] '+i.scene,'',
+    '- 测试模型：'+mv.model+' / v'+mv.version,'- 跳转平台：'+(PLAT_LABEL[L.key]||L.key),
+    '- 输出格式：'+(i.format||'—'),'- 备注：'+(i.note||'—'),'',
+    '**Prompt 模板**','','```text',i.prompt,'```','',
+    '**组装后的可执行 Prompt**','','```text',r.text,'```','');});});
+ lines.push('## Meta Prompts','');META.forEach(function(m){lines.push('### '+m.label+' · '+m.role,'',m.full,'');});
+ download('PromptBank_export.md',lines.join('\n'));toast('已导出 '+items.length+' 条');}
+function loadSample(){
+ state.inputs.source='CONFIDENTIALITY. Each party shall keep confidential all information disclosed by the other party in connection with this Agreement and shall not disclose it to any third party without prior written consent. This obligation shall survive termination for a period of three (3) years.';
+ state.inputs.target='保密义务。各方应对另一方就本协议披露的全部信息予以保密，未经事先书面同意，不得向任何第三方披露。该义务在本协议终止后继续有效，为期三（3）年。';
+ state.inputs.v1=state.inputs.target;
+ state.inputs.v2='保密条款：双方须对因本协议获知的对方信息严格保密；未经对方事先书面许可，不得泄露给第三方。本条款在协议终止后三年内持续有效。';
+ state.inputs.v3='【保密】任何一方均不得公开或转交另一方基于本协议提供的资料，除非已取得书面授权；协议终止后三年内本限制依然适用。';
+ state.inputs.lang='中文（中国内地法） / English (Hong Kong law)';
+ state.inputs.extra='面向非法律专业读者；保留条款编号；术语首次出现括注原文。';
+ syncCfg();save();$('morePanel').classList.add('open');
+ toast('已载入示例文本，可直接点 RUN ALL 或任意卡片');}
+
+/* ---------- events ---------- */
+function wireSeg(id,key){$(id).addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ $(id).querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+ b.classList.add('on');state[key]=b.dataset[key];render();});}
+function onCardClick(e){
+ if(e.target.classList.contains('pc-note')){e.target.classList.toggle('open');return;}
+ var btn=e.target.closest('[data-act]'),card=e.target.closest('.pcard');if(!btn||!card)return;
+ var item=BANK.filter(function(x){return x.id===card.dataset.id;})[0];if(!item)return;
+ var act=btn.dataset.act,mv=modelOf(item),r=build(item);
+ if(act==='open'){copyAndOpen(item,r.text,true);return;}
+ if(act==='build'||act==='model'||act==='run'){
+  openDrawer({item:item,title:item.no+' · '+item.scene,
+   sub:item.stageName+' · '+item.lang+' · '+mv.model+' v'+mv.version,
+   model:mv.model,version:mv.version,text:r.text,missing:r.missing});
+  if(act==='model')setTimeout(function(){$('dwModel').focus();$('dwModel').select();},260);
+  if(act==='run')setTimeout(runCurrent,280);}}
+function onMetaClick(e){var btn=e.target.closest('[data-mact]');if(!btn)return;
+ var card=e.target.closest('.meta-card');if(!card)return;
+ var m=META.filter(function(x){return x.id===card.dataset.meta;})[0];if(!m)return;
+ var ta=card.querySelector('.meta-input'),act=btn.dataset.mact;
+ if(act==='copy'){copyText(m.full,'已复制元 Prompt 原文');return;}
+ if(act==='fill'){if(state.current){ta.value=$('dwPrompt').value;toast('已填入当前生成的 Prompt');}
+  else toast('请先生成一条 Prompt');return;}
+ var text=buildMeta(m,ta.value);
+ if(act==='open'){var L=linkFor({model:'',id:'meta'},text);fallbackCopy(text);
+  window.open(L.url,'_blank','noopener,noreferrer');toast('已复制元 Prompt 并打开 '+(PLAT_LABEL[L.key]||L.key));return;}
+ openDrawer({meta:m,card:card,title:m.label+' · '+m.role,sub:'元提示词 · 可复制 / 跳转 / 运行',
+  model:state.api.override||state.modelMap.custom,version:'',text:text,missing:[]});}
+
+load();syncCfg();bindCfg();renderCfgTables();render();renderMeta();initEngine();
+wireSeg('stageSeg','stage');wireSeg('langSeg','lang');
+$('searchInput').addEventListener('input',function(){state.q=this.value.trim();render();});
+$('appendBtn').addEventListener('click',function(){state.appendFormat=!state.appendFormat;syncCfg();save();render();
+ toast(state.appendFormat?'已开启附加输出格式':'已关闭附加输出格式');if(state.current)rebuild();});
+$('moreBtn').addEventListener('click',function(){var p=$('morePanel');p.classList.toggle('open');
+ this.textContent=p.classList.contains('open')?'－ 收起更多输入':'＋ 更多输入：译文 1/2/3 · 目标法域 · 附加要求';});
+function openCfg(){$('cfgPanel').classList.add('open');$('workbench').scrollIntoView({behavior:'smooth',block:'start'});toast('配置面板已展开');}
+function openEngine(){$('enginePanel').classList.add('open');$('workbench').scrollIntoView({behavior:'smooth',block:'start'});toast('内嵌运行引擎设置已展开');}
+$('cfgBtn').addEventListener('click',openCfg);
+$('fab').addEventListener('click',function(){$('fabMenu').classList.toggle('open');});
+$('fab').addEventListener('keydown',function(e){if(e.key==='Enter')$('fabMenu').classList.toggle('open');});
+$('fabMenu').addEventListener('click',function(e){var b=e.target.closest('[data-fab]');if(!b)return;
+ $('fabMenu').classList.remove('open');
+ if(b.dataset.fab==='run')runAll('api');else if(b.dataset.fab==='engine')openEngine();
+ else if(b.dataset.fab==='cfg')openCfg();
+ else window.scrollTo({top:0,behavior:'smooth'});});
+$('sampleBtn').addEventListener('click',loadSample);
+$('clearBtn').addEventListener('click',function(){Object.keys(state.inputs).forEach(function(k){state.inputs[k]='';});
+ syncCfg();save();toast('输入已清空');});
+$('runAllBtn').addEventListener('click',function(){runAll('api');});
+$('run3Btn').addEventListener('click',function(){toast('先用 3 条确认模型能出结果');runAll('api',3);});
+ $('genAllBtn').addEventListener('click',function(){runAll('generate');});
+$('exportBtn').addEventListener('click',exportMd);
+$('printBtn').addEventListener('click',function(){window.print();});
+$('cardArea').addEventListener('click',onCardClick);
+$('metaArea').addEventListener('click',onMetaClick);
+$('batchList').addEventListener('click',function(e){var b=e.target.closest('[data-bact]');if(!b||!state.batch)return;
+ var i=parseInt(b.dataset.i,10),it=state.batch.items[i],rr=state.batch.results[i],txt=(state.batch.mode==='api'?(rr.result||rr.output):rr.output);
+ if(b.dataset.bact==='copy')copyText(txt,'已复制 '+it.no+' 的结果');else copyAndOpen(it,txt,true);});
+$('batchAbort').addEventListener('click',function(){if(state.batch)state.batch.abort=true;toast('正在中止…');});
+$('batchClose').addEventListener('click',function(){$('batchPanel').classList.remove('open');});
+$('batchExportMd').addEventListener('click',function(){batchExport('md');});
+$('batchExportJson').addEventListener('click',function(){batchExport('json');});
+$('batchCopyAll').addEventListener('click',function(){if(!state.batch)return;
+ copyText(state.batch.items.map(function(it,i){return '### '+it.no+' ['+it.lang+'] '+it.scene+'\n'+(state.batch.mode==='api'?(state.batch.results[i].result||state.batch.results[i].output):state.batch.results[i].output);}).join('\n\n'),'已复制全部结果');});
+$('batchRetry').addEventListener('click',function(){if(!state.batch)return;
+ var b=state.batch,failed=b.results.map(function(r,i){return r.status==='error'?i:-1;}).filter(function(i){return i>=0;});
+ if(!failed.length){toast('没有失败项');return;}
+ if(b.running){toast('已有任务在运行');return;}
+ if(!engineReady()){toast(engineHint());return;}
+ b.running=true;b.abort=false;b.fatal='';b.done=b.results.length-failed.length;
+ var n=$('batchNote');if(n){n.style.background='';n.style.borderLeft='';n.style.padding='';
+  n.innerHTML='↓ 正在重试 <b>'+failed.length+'</b> 条失败项…';}
+ (async function(){for(var k=0;k<failed.length;k++){
+   var i=failed[k],r=b.results[i],t0=Date.now();r.status='running';r.t0=t0;updateBatchRow(i);
+   try{r.result=await callApi(r.output,apiModelFor(b.items[i]),b.items[i]);r.status='done';r.error='';}
+   catch(e){r.result=friendlyErr(e.message);r.status='error';r.error=e.message;
+    if(isAccountFatal(e.message)){b.fatal=friendlyErr(e.message);break;}}
+   r.ms=Date.now()-t0;b.done++;updateBatchRow(i);updateBatchStat();}
+  b.running=false;
+  b.done=b.results.filter(function(x){return x.status!=='pending'&&x.status!=='running';}).length;
+  updateBatchStat();
+  if(b.fatal)showBatchGuide(b.fatal);
+  else{var nn=$('batchNote');if(nn)nn.innerHTML='↓ 重试完成：模型生成结果已填入；仍有失败项可再次点击「重试失败项」。';
+   toast('重试完成');}
+ })();});
+$('dwClose').addEventListener('click',closeDrawer);
+$('drawerMask').addEventListener('click',closeDrawer);
+$('dwBuild').addEventListener('click',function(){rebuild();toast('已按当前输入重新生成');});
+$('dwCopy').addEventListener('click',function(){copyText($('dwPrompt').value);});
+$('dwRun').addEventListener('click',runCurrent);
+$('dwCopyResult').addEventListener('click',function(){copyText($('dwResult').textContent,'已复制生成结果');});
+$('dwDownload').addEventListener('click',function(){var c=state.current;
+ download('prompt_'+(c&&c.item?c.item.no:'meta').replace(/\./g,'-')+'.txt',$('dwPrompt').value);toast('已下载');});
+$('dwModel').addEventListener('change',saveModel);
+$('dwVer').addEventListener('change',saveModel);
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeDrawer();$('fabMenu').classList.remove('open');}});
+
+/* headless verification hook */
+if(new URLSearchParams(location.search).has('selftest')){
+ var rep={cards:document.querySelectorAll('.pcard').length,metas:document.querySelectorAll('.meta-card').length,
+  engineMode:engineMode(),engineReady:engineReady(),engineUrl:engineUrl(),
+  presets:Object.keys(ENGINE_PRESETS).length,mappedModel:apiModelFor(BANK[0])};
+ state.inputs.source='SRC-TEST';state.inputs.target='TGT-TEST';
+ state.inputs.v1='V1';state.inputs.v2='V2';state.inputs.v3='V3';
+ var multi=BANK.filter(function(x){return x.id==='prod-3.1-en';})[0],mr=build(multi);
+ rep.multiSlots=mr.text.slice(0,230);rep.multiMissing=mr.missing;
+ var fam={};BANK.forEach(function(i){var f=familyOf(i.model);fam[f]=(fam[f]||0)+1;});
+ rep.families=fam;
+ rep.sampleLink=linkFor(BANK[0],'Hello world prompt').url.slice(0,90);
+ var c=document.querySelector('.pcard[data-id="post-1.1-cn"]');
+ c.querySelector('[data-act="build"]').click();
+ rep.drawerOpen=$('drawer').classList.contains('on');
+ rep.drawerText=$('dwPrompt').value.slice(0,150);closeDrawer();
+ $('langSeg').querySelector('[data-lang="en"]').click();rep.enCards=document.querySelectorAll('.pcard').length;
+ $('langSeg').querySelector('[data-lang="compare"]').click();rep.compareRows=document.querySelectorAll('.compare-row').length;
+ $('langSeg').querySelector('[data-lang="all"]').click();
+ $('genAllBtn').click();
+ setTimeout(function(){rep.batchTotal=state.batch?state.batch.items.length:0;
+  rep.batchDone=state.batch?state.batch.done:0;
+  rep.batchMode=state.batch?state.batch.mode:'none';
+  rep.engineModeFinal=engineMode();rep.engineReadyFinal=engineReady();
+  rep.engineLocalFinal=!!(state.engine.local&&state.engine.local.ok);
+  var d=document.createElement('div');d.id='selftest-out';d.textContent=JSON.stringify(rep);
+  document.body.appendChild(d);},400);
+ setTimeout(async function(){
+  var o={apiResult:'SKIP'};
+  if(engineReady()){try{o.apiResult=String(await callApi('SELFTEST',apiModelFor(BANK[0]),BANK[0])).slice(0,110);}
+   catch(e){o.apiResult='ERR: '+e.message;}}
+  o.provider=callApi.last?callApi.last.provider:'';
+  var d2=document.createElement('div');d2.id='selftest-api';d2.textContent=JSON.stringify(o);
+  document.body.appendChild(d2);},700);
+ if(new URLSearchParams(location.search).get('selftest')==='runall'){
+  setTimeout(function(){$('runAllBtn').click();
+   setTimeout(function(){var b=state.batch,o2={mode:b?b.mode:'none',done:b?b.done:0,
+    total:b?b.items.length:0,sample:b?String((b.results[0].result||b.results[0].output)||'').slice(0,100):'',
+    errors:b?b.results.filter(function(r){return r.status==='error';}).length:0};
+    var d3=document.createElement('div');d3.id='selftest-runall';d3.textContent=JSON.stringify(o2);
+    document.body.appendChild(d3);},2800);},900);}
+}
+})();
+</script>
+
+
+</body></html>
